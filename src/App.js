@@ -65,7 +65,7 @@ function Object(props) {
         width: `${ctx.d}px`,
         height: `${ctx.d}px`,
     };
-    return <div className="target" style={style}/>;
+    return <div className={props.pos[2].className} style={style}/>;
 }
 
 const Ctx = React.createContext();
@@ -82,11 +82,17 @@ function sanitizePlayerPos(pos, level) {
         ],
     };
     const x = findCollisionInArray(pos, level.objects);
+    console.log(x);
     if (x !== null) {
-        results.score = level.score + 1;
-        level.objects.splice(x, 1);
-        if (level.objects.length === 0) {
-            level.objects = generateObjects(level.width, level.height, results.pos);
+        const o = level.objects[x];
+        if (o[2] === ObjType.target) {
+            results.score = level.score + 1;
+            level.objects.splice(x, 1);
+            if (numberOfObjTypes(level.objects, ObjType.target) === 0) {
+                level.objects = generateObjects(level.width, level.height, results.pos);
+            }
+        } else {
+            return {};
         }
     }
     return results;
@@ -94,26 +100,54 @@ function sanitizePlayerPos(pos, level) {
 
 function findCollisionInArray(pos, array, n) {
     const len = n === undefined ? array.length : n;
-    console.log(pos, array, len);
+    let result = null;
     for (let i = 0; i < len; i++) {
         if (isCollision(pos, array[i])) {
-            return i;
+            result = i;
+            break;
         }
     }
-    return null;
+    console.log("findCollisionInArray", pos.join(","), JSON.stringify(array), n, result);
+    return result;
 }
 
-function isCollision(a, b) {
+export function isCollision(a, b) {
     return a[0] === b[0] && a[1] === b[1];
 }
 
+function numberOfObjTypes(array, type) {
+    let result = 0;
+    for (let i = 0; i < array.length; i++) {
+        console.log(array[i][2], type);
+        if (array[i][2] === type) {
+            result += 1;
+        }
+    }
+    return result;
+}
+
+const ObjType = {
+    target: {
+        className: "target",
+    },
+    wall: {
+        className: "wall",
+    },
+};
+
 function generateObjects(w, h, pos) {
-    const n = 3;
-    const result = Array(n);
-    for (let i = 0; i < n; i++) {
+    const numTargets = 3;
+    const numWalls = 3 + Math.floor(Math.random() * 3);
+    const num = numTargets + numWalls;
+    const result = Array(num);
+    for (let i = 0; i < num; i++) {
         do {
-            result[i] = [Math.floor(Math.random() * w), Math.floor(Math.random() * h)];
-        } while (isCollision(result[i], pos) || findCollisionInArray(pos, result, i + 1));
+            result[i] = [
+                Math.floor(Math.random() * w),
+                Math.floor(Math.random() * h),
+                i < numTargets ? ObjType.target : ObjType.wall,
+            ];
+        } while (isCollision(result[i], pos) || findCollisionInArray(result[i], result, i) !== null);
     }
     return result;
 }

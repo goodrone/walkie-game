@@ -28,6 +28,12 @@
 .target {
     border-radius: 50%;
     position: absolute;
-    background: red;
     transform: scale(0.75);
+    background: red;
+}
+.wall {
+    border-radius: 25%;
+    position: absolute;
+    transform: scale(0.95);
+    background: orange;
 }
