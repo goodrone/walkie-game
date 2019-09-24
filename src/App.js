@@ -15,7 +15,7 @@ function Map(props) {
     const moveLeft = () => props.onSetPlayerPos([ctx.pos[0] - 1, ctx.pos[1]]);
     const moveRight = () => props.onSetPlayerPos([ctx.pos[0] + 1, ctx.pos[1]]);
     const handler = e => {
-        const rect = e.target.getBoundingClientRect();
+        const rect = ref.current.getBoundingClientRect();
         const p = e.touches[0];
         const rx = p.clientX - rect.left - rect.width / 2;
         const ry = p.clientY - rect.top - rect.height / 2;
