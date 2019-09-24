@@ -78,7 +78,7 @@ function Player(props) {
     return (
         <div className="player" style={style}
             ref={ref}>
-            &#x1f600;
+            &#x1f642;
         </div>
     );
 }
