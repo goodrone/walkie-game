@@ -67,9 +67,26 @@ function cellPosToStyle(cell) {
 
 function Player(props) {
     const ctx = React.useContext(Ctx);
+    const ref = React.useRef();
     const cell = calcCellPos(ctx.pos, ctx);
     const style = cellPosToStyle(cell);
-    return <div className={combine("player", ctx.score % 2 && "next")} style={style}/>;
+    // Prevent exhaustive-deps linter rule from firing
+    const addCallbacks = () => {
+        ctx.pos.animateEat = () => {
+            const elem = ref.current;
+            elem.classList.remove("animate-eat");
+            void elem.offsetWidth;
+            elem.classList.add("animate-eat");
+            console.log("!!!", elem);
+        };
+    };
+    React.useEffect(addCallbacks, []);
+    return (
+        <div className="player" style={style}
+            ref={ref}>
+            &#x1f600;
+        </div>
+    );
 }
 
 function Object(props) {
@@ -102,6 +119,7 @@ function sanitizePlayerPos(pos, level) {
             if (numberOfObjTypes(level.objects, ObjType.target) === 0) {
                 level.objects = generateObjects(level.width, level.height, results.pos);
             }
+            level.pos.animateEat();
         } else if (o.type === ObjType.wall) {
             o.hp -= 1;
             if (o.hp <= 0) {
@@ -185,8 +203,8 @@ function Walkie() {
             <Ctx.Provider value={level}>
                 <div>{level.score}</div>
                 <Map onSetPlayerPos={setPlayerPos}>
-                    <Player/>
                     {level.objects.map((pos, i) => <Object key={i} pos={pos}/>)}
+                    <Player/>
                 </Map>
             </Ctx.Provider>
         </div>

@@ -19,13 +19,26 @@
 
 .player {
     position: absolute;
-    background: #31b931;
     transition: transform 0.3s ease;
     transform: rotate(0deg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    font-size: 30px;
 }
 .player.next {
     transform: rotate(90deg);
     transition: transform 0.3s ease;
+}
+.player.animate-eat {
+    animation-name: example;
+    animation-duration: 0.3s;
+}
+@keyframes example {
+    0% {transform: scale(1);}
+    50% {transform: scale(2);}
+    100% {transform: scale(1);}
 }
 
 .target {
