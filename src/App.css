@@ -48,8 +48,8 @@
     background: red;
 }
 .wall {
-    border-radius: 25%;
+    border: 5px solid #464646;
+    background: #000;
     position: absolute;
-    transform: scale(0.95);
-    background: orange;
+    box-sizing: border-box;
 }
