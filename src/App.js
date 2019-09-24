@@ -16,9 +16,10 @@ function Map(props) {
     const moveRight = () => props.onSetPlayerPos({x: ctx.pos.x + 1, y: ctx.pos.y});
     const handler = e => {
         const rect = ref.current.getBoundingClientRect();
+        const playerRect = calcCellPos(ctx.pos, ctx);
         const p = e.touches[0];
-        const rx = p.clientX - rect.left - rect.width / 2;
-        const ry = p.clientY - rect.top - rect.height / 2;
+        const rx = p.clientX - (rect.left + playerRect.x) - playerRect.width / 2;
+        const ry = p.clientY - (rect.top + playerRect.y) - playerRect.height / 2;
         if (ry > rx) {
             if (rx + ry > 0) moveDown();
             else moveLeft();
@@ -46,25 +47,35 @@ function combine(...args) {
     });
 }
 
+function calcCellPos(pos, level) {
+    return {
+        x: pos.x * level.d,
+        y: pos.y * level.d,
+        width: level.d,
+        height: level.d,
+    };
+}
+
+function cellPosToStyle(cell) {
+    return {
+        left: `${cell.x}px`,
+        top: `${cell.y}px`,
+        width: `${cell.width}px`,
+        height: `${cell.height}px`,
+    };
+}
+
 function Player(props) {
     const ctx = React.useContext(Ctx);
-    const style = {
-        left: `${ctx.pos.x * ctx.d}px`,
-        top: `${ctx.pos.y * ctx.d}px`,
-        width: `${ctx.d}px`,
-        height: `${ctx.d}px`,
-    };
+    const cell = calcCellPos(ctx.pos, ctx);
+    const style = cellPosToStyle(cell);
     return <div className={combine("player", ctx.score % 2 && "next")} style={style}/>;
 }
 
 function Object(props) {
     const ctx = React.useContext(Ctx);
-    const style = {
-        left: `${props.pos.x * ctx.d}px`,
-        top: `${props.pos.y * ctx.d}px`,
-        width: `${ctx.d}px`,
-        height: `${ctx.d}px`,
-    };
+    const cell = calcCellPos(props.pos, ctx);
+    const style = cellPosToStyle(cell);
     return <div className={props.pos.type.className} style={style}/>;
 }
 

@@ -13,6 +13,9 @@
 .map:focus {
     outline: none;
 }
+.map {
+    border: 8px solid #464646;
+}
 
 .player {
     position: absolute;
