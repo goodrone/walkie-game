@@ -10,10 +10,10 @@ function Map(props) {
         width: `${ctx.width * ctx.d}px`,
         height: `${ctx.height * ctx.d}px`,
     };
-    const moveUp = () => props.onSetPlayerPos({x: ctx.pos.x, y: ctx.pos.y - 1});
-    const moveDown = () => props.onSetPlayerPos({x: ctx.pos.x, y: ctx.pos.y + 1});
-    const moveLeft = () => props.onSetPlayerPos({x: ctx.pos.x - 1, y: ctx.pos.y});
-    const moveRight = () => props.onSetPlayerPos({x: ctx.pos.x + 1, y: ctx.pos.y});
+    const moveUp = () => ctx.setLevel(props.onSetPlayerPos({x: ctx.pos.x, y: ctx.pos.y - 1}));
+    const moveDown = () => ctx.setLevel(props.onSetPlayerPos({x: ctx.pos.x, y: ctx.pos.y + 1}));
+    const moveLeft = () => ctx.setLevel(props.onSetPlayerPos({x: ctx.pos.x - 1, y: ctx.pos.y}));
+    const moveRight = () => ctx.setLevel(props.onSetPlayerPos({x: ctx.pos.x + 1, y: ctx.pos.y}));
     const handler = e => {
         const rect = ref.current.getBoundingClientRect();
         const playerRect = calcCellPos(ctx.pos, ctx);
@@ -71,7 +71,6 @@ function Player(props) {
             elem.classList.remove("animate-eat");
             void elem.offsetWidth;
             elem.classList.add("animate-eat");
-            console.log("!!!", elem);
         };
     };
     React.useEffect(addCallbacks, []);
@@ -83,7 +82,7 @@ function Player(props) {
     );
 }
 
-function Object(props) {
+function Object_(props) {
     const ctx = React.useContext(Ctx);
     const cell = calcCellPos(props.pos, ctx);
     const style = cellPosToStyle(cell);
@@ -116,7 +115,7 @@ function sanitizePlayerPos(pos, level) {
             results.score = level.score + 1;
             level.objects.splice(x, 1);
             if (numberOfObjTypes(level.objects, ObjType.target) === 0) {
-                level.objects = generateObjects(level.width, level.height, results.pos);
+                return level.nextLevel(level.setLevel);
             }
             level.pos.animateEat();
         } else if (o.type === ObjType.wall) {
@@ -188,26 +187,78 @@ function generateObjects(w, h, pos) {
     return result;
 }
 
-function Walkie() {
-    const [level, setLevel] = React.useState(() => {
-        const x = {
-            width: 7, height: 7, d: 45,
-            score: 0,
-            pos: {x: 3, y: 3},
+function $addObjectsOfType(type, ...args) {
+    return level => {
+        for (let i = 0; i < args.length; i++) {
+            level.objects.push({...args[i], type});
         }
-        x.objects = generateObjects(x.width, x.height, x.pos);
-        return x;
-    });
-    const setPlayerPos = pos => setLevel(prev => ({...prev,
-        ...sanitizePlayerPos(pos, prev)}));
+    };
+}
+
+const baseLevel = {
+    d: 45,
+    width: 7, height: 7,
+    score: 0,
+    objects: [],
+    walk: pos => prev => ({...prev, ...sanitizePlayerPos(pos, prev)}),
+    render: level => {
+        return (
+            <Map onSetPlayerPos={level.walk}>
+                {level.objects.map((pos, i) => <Object_ key={i} pos={pos}/>)}
+                <Player/>
+            </Map>
+        );
+    },
+};
+export const levels = {
+    t1: setLevel => Object.assign({
+        ...baseLevel,
+        setLevel,
+        pos: {x: 2, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 4, y: 3}),
+        ],
+        nextLevel: setLevel => {
+            setLevel(startLevel(levels.t2(setLevel)));
+        },
+    }),
+    t2: setLevel => Object.assign({
+        ...baseLevel,
+        setLevel,
+        pos: {x: 1, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 5, y: 3}),
+            $addObjectsOfType(ObjType.wall, {x: 3, y: 2}, {x: 3, y: 3}, {x: 3, y: 4}),
+        ],
+        nextLevel: setLevel => {
+            setLevel(startLevel(levels.t1(setLevel)));
+        },
+    }),
+};
+const firstLevel = levels.t2;
+
+function startLevel(level) {
+    const result = Object.assign(level);
+    level.objects.length = 0;
+    if (Array.isArray(level.onLoad)) {
+        level.onLoad.map(f => f(result));
+    }
+    return result;
+}
+
+function Walkie() {
+    const [level, setLevel] = React.useState(null);
+    React.useEffect(() => {
+        setLevel(startLevel(firstLevel(setLevel)));
+    }, []);
+    if (level === null) {
+        return null;
+    }
     return (
         <div className="walkie">
             <Ctx.Provider value={level}>
-                <div>{level.score}</div>
-                <Map onSetPlayerPos={setPlayerPos}>
-                    {level.objects.map((pos, i) => <Object key={i} pos={pos}/>)}
-                    <Player/>
-                </Map>
+                <div>{level.score} | {level.objects.length}</div>
+                {level.render(level)}
             </Ctx.Provider>
         </div>
     );
