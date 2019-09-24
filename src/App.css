@@ -17,15 +17,17 @@
     border: 8px solid #464646;
 }
 
-.player {
-    position: absolute;
-    transition: transform 0.3s ease;
-    transform: rotate(0deg);
+.player, .target, .wall {
     display: flex;
     flex-direction: column;
     justify-content: center;
     text-align: center;
     font-size: 30px;
+    position: absolute;
+}
+.player {
+    transition: transform 0.3s ease;
+    transform: rotate(0deg);
 }
 .player.next {
     transform: rotate(90deg);
@@ -42,14 +44,9 @@
 }
 
 .target {
-    border-radius: 50%;
-    position: absolute;
-    transform: scale(0.75);
-    background: red;
 }
 .wall {
     border: 5px solid #464646;
     background: #000;
-    position: absolute;
     box-sizing: border-box;
 }

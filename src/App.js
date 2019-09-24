@@ -41,12 +41,6 @@ function Map(props) {
         tabIndex="0" ref={ref} className="map">{props.children}</div>;
 }
 
-function combine(...args) {
-    return args.reduce((a, b) => {
-        return b ? a + " " + b : a;
-    });
-}
-
 function calcCellPos(pos, level) {
     return {
         x: pos.x * level.d,
@@ -93,7 +87,12 @@ function Object(props) {
     const ctx = React.useContext(Ctx);
     const cell = calcCellPos(props.pos, ctx);
     const style = cellPosToStyle(cell);
-    return <div className={props.pos.type.className} style={style}/>;
+    const type = props.pos.type;
+    return (
+        <div className={type.className} style={style}>
+            {type.render && type.render()}
+        </div>
+    );
 }
 
 const Ctx = React.createContext();
@@ -162,6 +161,9 @@ function numberOfObjTypes(array, type) {
 const ObjType = {
     target: {
         className: "target",
+        render: () => {
+            return <>&#x1f352;</>;
+        },
     },
     wall: {
         className: "wall",
