@@ -10,10 +10,10 @@ function Map(props) {
         width: `${ctx.width * ctx.d}px`,
         height: `${ctx.height * ctx.d}px`,
     };
-    const moveUp = () => props.onSetPlayerPos([ctx.pos[0], ctx.pos[1] - 1]);
-    const moveDown = () => props.onSetPlayerPos([ctx.pos[0], ctx.pos[1] + 1]);
-    const moveLeft = () => props.onSetPlayerPos([ctx.pos[0] - 1, ctx.pos[1]]);
-    const moveRight = () => props.onSetPlayerPos([ctx.pos[0] + 1, ctx.pos[1]]);
+    const moveUp = () => props.onSetPlayerPos({x: ctx.pos.x, y: ctx.pos.y - 1});
+    const moveDown = () => props.onSetPlayerPos({x: ctx.pos.x, y: ctx.pos.y + 1});
+    const moveLeft = () => props.onSetPlayerPos({x: ctx.pos.x - 1, y: ctx.pos.y});
+    const moveRight = () => props.onSetPlayerPos({x: ctx.pos.x + 1, y: ctx.pos.y});
     const handler = e => {
         const rect = ref.current.getBoundingClientRect();
         const p = e.touches[0];
@@ -49,8 +49,8 @@ function combine(...args) {
 function Player(props) {
     const ctx = React.useContext(Ctx);
     const style = {
-        left: `${ctx.pos[0] * ctx.d}px`,
-        top: `${ctx.pos[1] * ctx.d}px`,
+        left: `${ctx.pos.x * ctx.d}px`,
+        top: `${ctx.pos.y * ctx.d}px`,
         width: `${ctx.d}px`,
         height: `${ctx.d}px`,
     };
@@ -60,12 +60,12 @@ function Player(props) {
 function Object(props) {
     const ctx = React.useContext(Ctx);
     const style = {
-        left: `${props.pos[0] * ctx.d}px`,
-        top: `${props.pos[1] * ctx.d}px`,
+        left: `${props.pos.x * ctx.d}px`,
+        top: `${props.pos.y * ctx.d}px`,
         width: `${ctx.d}px`,
         height: `${ctx.d}px`,
     };
-    return <div className={props.pos[2].className} style={style}/>;
+    return <div className={props.pos.type.className} style={style}/>;
 }
 
 const Ctx = React.createContext();
@@ -76,21 +76,27 @@ function clamp(x, a, b) {
 
 function sanitizePlayerPos(pos, level) {
     const results = {
-        pos: [
-            clamp(pos[0], 0, level.width - 1),
-            clamp(pos[1], 0, level.height - 1),
-        ],
+        pos: {
+            ...level.pos,
+            x: clamp(pos.x, 0, level.width - 1),
+            y: clamp(pos.y, 0, level.height - 1),
+        },
     };
     const x = findCollisionInArray(pos, level.objects);
-    console.log(x);
     if (x !== null) {
         const o = level.objects[x];
-        if (o[2] === ObjType.target) {
+        if (o.type === ObjType.target) {
             results.score = level.score + 1;
             level.objects.splice(x, 1);
             if (numberOfObjTypes(level.objects, ObjType.target) === 0) {
                 level.objects = generateObjects(level.width, level.height, results.pos);
             }
+        } else if (o.type === ObjType.wall) {
+            o.hp -= 1;
+            if (o.hp <= 0) {
+                level.objects.splice(x, 1);
+            }
+            return {};
         } else {
             return {};
         }
@@ -107,19 +113,17 @@ function findCollisionInArray(pos, array, n) {
             break;
         }
     }
-    console.log("findCollisionInArray", pos.join(","), JSON.stringify(array), n, result);
     return result;
 }
 
 export function isCollision(a, b) {
-    return a[0] === b[0] && a[1] === b[1];
+    return a.x === b.x && a.y === b.y;
 }
 
 function numberOfObjTypes(array, type) {
     let result = 0;
     for (let i = 0; i < array.length; i++) {
-        console.log(array[i][2], type);
-        if (array[i][2] === type) {
+        if (array[i].type === type) {
             result += 1;
         }
     }
@@ -142,11 +146,12 @@ function generateObjects(w, h, pos) {
     const result = Array(num);
     for (let i = 0; i < num; i++) {
         do {
-            result[i] = [
-                Math.floor(Math.random() * w),
-                Math.floor(Math.random() * h),
-                i < numTargets ? ObjType.target : ObjType.wall,
-            ];
+            result[i] = {
+                x: Math.floor(Math.random() * w),
+                y: Math.floor(Math.random() * h),
+                type: i < numTargets ? ObjType.target : ObjType.wall,
+                hp: 5,
+            };
         } while (isCollision(result[i], pos) || findCollisionInArray(result[i], result, i) !== null);
     }
     return result;
@@ -157,7 +162,7 @@ function Walkie() {
         const x = {
             width: 7, height: 7, d: 45,
             score: 0,
-            pos: [3, 3],
+            pos: {x: 3, y: 3},
         }
         x.objects = generateObjects(x.width, x.height, x.pos);
         return x;
