@@ -35,8 +35,10 @@ function Map(props) {
         else if (e.key === "ArrowUp") moveUp();
     };
     React.useEffect(() => {
-        ref.current.focus();
-    }, []);
+        if (!ctx.popover) {
+            ref.current.focus();
+        }
+    });
     return <div style={style} onTouchStart={handler} onKeyDown={keyHandler}
         tabIndex="0" ref={ref} className="map">{props.children}</div>;
 }
@@ -85,7 +87,12 @@ function Player(props) {
             ref={ref}>
             &#x1f642;
             {ctx.pos.carry &&
-                <span className="carry">{ctx.pos.carry.render()}</span>}
+                <span className="carry">
+                    {ctx.pos.carry.render({
+                        className: ctx.pos.carry.className,
+                        it: ctx.pos.carry,
+                    })}
+                </span>}
         </div>
     );
 }
@@ -97,7 +104,7 @@ function Object_(props) {
     const type = props.pos.type;
     return (
         <div className={type.className} style={style}>
-            {type.render && type.render()}
+            {type.render && type.render({it: props.pos.type})}
         </div>
     );
 }
@@ -154,16 +161,41 @@ function numberOfObjTypes(array, type) {
     return result;
 }
 
+const inputCooldownMs = 600;
+
+function Square({ d, color, shadow, className }) {
+    const style = {
+        boxShadow: shadow && "0 0 10px 1px #d4d4d4",
+        margin: "auto",
+    };
+    return (
+        <svg width={d} height={d} style={style} className={className}>
+            <rect width={d} height={d} fill={color}/>
+        </svg>
+    );
+}
+
+function carryItem(level, next, index) {
+    if (level.pos.carry) {
+        next.pos.carry = level.objects.splice(index, 1, {
+            ...next.pos,
+            type: level.pos.carry,
+        })[0].type;
+        next.pos.x = level.pos.x;
+        next.pos.y = level.pos.y;
+    } else {
+        next.pos.carry = level.objects.splice(index, 1)[0].type;
+    }
+    return next;
+}
+
 const ObjType = {
     target: {
         className: "target",
-        render: () => {
-            return <>&#x1f352;</>;
-        },
+        render: () => <>&#x1f352;</>,
         interact: (level, next, index) => {
             next.score = level.score + 1;
             level.objects.splice(index, 1);
-            console.log(level.objects);
             if (numberOfObjTypes(level.objects, ObjType.target) === 0) {
                 return level.nextLevel(level.setLevel);
             }
@@ -176,9 +208,7 @@ const ObjType = {
     },
     lock: {
         className: "lock",
-        render: () => {
-            return <>&#x1f512;</>;
-        },
+        render: () => <>&#x1f512;</>,
         interact: (level, next, index) => {
             if (!level.pos.carry) {
                 level.pos.animateShake();
@@ -192,13 +222,57 @@ const ObjType = {
     },
     key: {
         className: "lock",
-        render: () => {
-            return <>&#x1f511;</>;
-        },
+        render: () => <>&#x1f511;</>,
+        interact: carryItem,
+    },
+    figure: {
+        className: "figure",
+        render: (props) => (
+            <Square color={props.it.what} d={30} className={(props || {}).className || null}/>
+        ),
+        interact: carryItem,
+    },
+    npc: {
+        className: "npc",
+        render: () => <>&#x1f468;&#x1f3fb;</>,
         interact: (level, next, index) => {
-            next.pos.carry = ObjType.key;
-            level.objects.splice(index, 1);
-            return next;
+            const o = level.objects[index];
+            if (level.pos.carry && level.pos.carry.what === o.type.wants) {
+                level.objects.splice(index, 1);
+                next.pos.carry = null;
+                level.pos.animateEat();
+                return next;
+            }
+            level.popover = function Popover() {
+                const [ready, setReady] = React.useState();
+                const ref = React.useRef();
+                React.useEffect(() => {
+                    const t = setTimeout(() => {
+                        setReady(true);
+                        ref.current.focus();
+                    }, inputCooldownMs);
+                    return () => clearTimeout(t);
+                }, []);
+                const dismiss = e => {
+                    ready && level.setLevel(prev => ({...prev, popover: null}));
+                };
+                return (
+                    <div className="popover">
+                        <div className="speech">
+                            <div className="who">
+                                &#x1f468;&#x1f3fb;
+                            </div>
+                            <div className="what">
+                                <Square color="red" d={40} shadow/>
+                            </div>
+                        </div>
+                        <button onClick={dismiss} className={ready && "show"} ref={ref}>
+                            &#x2713;
+                        </button>
+                    </div>
+                );
+            };
+            return {};
         },
     },
 };
@@ -223,6 +297,7 @@ const baseLevel = {
             <Map onSetPlayerPos={level.walk}>
                 {level.objects.map((pos, i) => <Object_ key={i} pos={pos}/>)}
                 <Player/>
+                {level.popover && level.popover()}
             </Map>
         );
     },
@@ -249,7 +324,7 @@ export const levels = {
             $addObjectsOfType(ObjType.target, {x: 5, y: 5}),
             $addObjectsOfType(ObjType.wall,
                 {x: 4, y: 1}, {x: 5, y: 1}, {x: 5, y: 2},
-                {x: 1, y: 4}, {x: 1, y: 5}, {x: 2, y: 5},),
+                {x: 1, y: 4}, {x: 1, y: 5}, {x: 2, y: 5}),
         ],
         nextLevel: winAndSetNextByTemplate(levels.t3, setLevel),
     }),
@@ -308,6 +383,20 @@ export const levels = {
                 {x: 3, y: 0}, {x: 3, y: 1}, {x: 3, y: 3}, {x: 4, y: 3},
                 {x: 5, y: 3}, {x: 6, y: 3}),
         ],
+        nextLevel: winAndSetNextByTemplate(levels.t8, setLevel),
+    }),
+    t8: setLevel => ({
+        ...baseLevel, _name: "t8", setLevel,
+        pos: {x: 3, y: 1},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 3, y: 5}),
+            $addObjectsOfType({...ObjType.npc, wants: "red"}, {x: 3, y: 3}),
+            $addObjectsOfType({...ObjType.figure, what: "red"}, {x: 1, y: 1}),
+            $addObjectsOfType({...ObjType.figure, what: "green"}, {x: 5, y: 1}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 0, y: 3}, {x: 1, y: 3}, {x: 2, y: 3},
+                {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}),
+        ],
         nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
     }),
     win: next => setLevel => ({
@@ -328,7 +417,7 @@ export const levels = {
                 const t = setTimeout(() => {
                     setShow(true);
                     ref.current.focus();
-                }, 300);
+                }, inputCooldownMs);
                 return () => clearTimeout(t);
             }, []);
             return (
@@ -339,11 +428,10 @@ export const levels = {
         },
     }),
 };
-const firstLevel = levels.t7;
+const firstLevel = levels.t1;
 
 function startLevel(level) {
     const result = Object.assign(level);
-    console.log("startLevel", level);
     level.objects.length = 0;
     if (Array.isArray(level.onLoad)) {
         level.onLoad.map(f => f(result));
@@ -355,7 +443,11 @@ function startLevel(level) {
 }
 
 export function Walkie(props) {
-    const [level, setLevel] = React.useState(null);
+    const [level, _setLevel] = React.useState(null);
+    const setLevel = (...args) => {
+        _setLevel(...args);
+
+    };
     React.useEffect(() => {
         setLevel(startLevel((props.startLevel || firstLevel)(setLevel)));
     }, []);
