@@ -169,24 +169,6 @@ const ObjType = {
     },
 };
 
-function generateObjects(w, h, pos) {
-    const numTargets = 3;
-    const numWalls = 3 + Math.floor(Math.random() * 3);
-    const num = numTargets + numWalls;
-    const result = Array(num);
-    for (let i = 0; i < num; i++) {
-        do {
-            result[i] = {
-                x: Math.floor(Math.random() * w),
-                y: Math.floor(Math.random() * h),
-                type: i < numTargets ? ObjType.target : ObjType.wall,
-                hp: 5,
-            };
-        } while (isCollision(result[i], pos) || findCollisionInArray(result[i], result, i) !== null);
-    }
-    return result;
-}
-
 function $addObjectsOfType(type, ...args) {
     return level => {
         for (let i = 0; i < args.length; i++) {
@@ -196,12 +178,13 @@ function $addObjectsOfType(type, ...args) {
 }
 
 const baseLevel = {
+    _name: "base",
     d: 45,
     width: 7, height: 7,
     score: 0,
     objects: [],
     walk: pos => prev => ({...prev, ...sanitizePlayerPos(pos, prev)}),
-    render: level => {
+    render: ({ level }) => {
         return (
             <Map onSetPlayerPos={level.walk}>
                 {level.objects.map((pos, i) => <Object_ key={i} pos={pos}/>)}
@@ -210,35 +193,85 @@ const baseLevel = {
         );
     },
 };
+function winAndSetNextByTemplate(template, setLevel) {
+    return setLevel => {
+        const next = () => setLevel(startLevel(template(setLevel)));
+        setLevel(startLevel(levels.win(next)(setLevel)));
+    }
+}
 export const levels = {
-    t1: setLevel => Object.assign({
-        ...baseLevel,
-        setLevel,
+    t1: setLevel => ({
+        ...baseLevel, _name: "t1", setLevel,
         pos: {x: 2, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 4, y: 3}),
         ],
-        nextLevel: setLevel => {
-            setLevel(startLevel(levels.t2(setLevel)));
-        },
+        nextLevel: winAndSetNextByTemplate(levels.t2, setLevel),
     }),
-    t2: setLevel => Object.assign({
-        ...baseLevel,
-        setLevel,
+    t2: setLevel => ({
+        ...baseLevel, _name: "t2", setLevel,
+        pos: {x: 1, y: 1},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 5, y: 5}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 4, y: 1}, {x: 5, y: 1}, {x: 5, y: 2},
+                {x: 1, y: 4}, {x: 1, y: 5}, {x: 2, y: 5},),
+        ],
+        nextLevel: winAndSetNextByTemplate(levels.t3, setLevel),
+    }),
+    t3: setLevel => ({
+        ...baseLevel, _name: "t3", setLevel,
         pos: {x: 1, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 5, y: 3}),
             $addObjectsOfType(ObjType.wall, {x: 3, y: 2}, {x: 3, y: 3}, {x: 3, y: 4}),
         ],
-        nextLevel: setLevel => {
-            setLevel(startLevel(levels.t1(setLevel)));
+        nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
+    }),
+    t4: setLevel => ({
+        ...baseLevel, _name: "t4", setLevel,
+        pos: {x: 2, y: 1},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 2, y: 5}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 0, y: 3}, {x: 1, y: 3}, {x: 2, y: 3}, {x: 3, y: 3}, {x: 4, y: 3}),
+        ],
+        nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
+    }),
+    win: next => setLevel => ({
+        ...baseLevel,
+        _name: "win",
+        setLevel,
+        render: function Win() {
+            const b = baseLevel;
+            const width = b.width * b.d;
+            const height = b.height * b.d;
+            const style = {
+                width: `${width}px`, height: `${height}px`,
+                tabIndex: 0,
+            };
+            const [show, setShow] = React.useState(false);
+            const ref = React.useRef();
+            React.useEffect(() => {
+                const t = setTimeout(() => {
+                    setShow(true);
+                    ref.current.focus();
+                }, 300);
+                return () => clearTimeout(t);
+            }, []);
+            return (
+                <div className="win-level" style={style}>
+                    {show && <button onClick={next} ref={ref}>&#x25b6;</button>}
+                </div>
+            );
         },
     }),
 };
-const firstLevel = levels.t2;
+const firstLevel = levels.t4;
 
 function startLevel(level) {
     const result = Object.assign(level);
+    console.log("startLevel", level);
     level.objects.length = 0;
     if (Array.isArray(level.onLoad)) {
         level.onLoad.map(f => f(result));
@@ -254,11 +287,12 @@ function Walkie() {
     if (level === null) {
         return null;
     }
+    const RenderLevel = level.render;
     return (
         <div className="walkie">
             <Ctx.Provider value={level}>
                 <div>{level.score} | {level.objects.length}</div>
-                {level.render(level)}
+                <RenderLevel level={level}/>
             </Ctx.Provider>
         </div>
     );

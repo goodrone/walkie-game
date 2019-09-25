@@ -16,6 +16,25 @@
 .map {
     border: 8px solid #464646;
 }
+.win-level {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #050;
+}
+.win-level button {
+    background: #181;
+    width: 100px;
+    height: 100px;
+    border: none;
+    border-radius: 50%;
+    font-size: 40px;
+    color: #fff;
+}
+.win-level button:focus {
+    outline: none;
+}
 
 .player, .target, .wall {
     display: flex;
@@ -46,7 +65,8 @@
 .target {
 }
 .wall {
-    border: 5px solid #464646;
+    border-radius: 40%;
+    border: 3px solid #333;
     background: #000;
     box-sizing: border-box;
 }
