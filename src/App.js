@@ -184,7 +184,10 @@ const ObjType = {
                 level.pos.animateShake();
                 return {};
             }
-            return level.nextLevel(level.setLevel);
+            level.objects.splice(index, 1);
+            next.pos.carry = null;
+            level.pos.animateEat();
+            return next;
         },
     },
     key: {
@@ -285,8 +288,7 @@ export const levels = {
         ...baseLevel, _name: "t6", setLevel,
         pos: {x: 1, y: 1},
         onLoad: [
-            $addObjectsOfType(ObjType.target,
-                {x: 5, y: 1}),
+            $addObjectsOfType(ObjType.target, {x: 5, y: 1}),
             $addObjectsOfType(ObjType.wall,
                 {x: 3, y: 0}, {x: 3, y: 1}, {x: 3, y: 2}, {x: 3, y: 3},
                 {x: 1, y: 3}, {x: 1, y: 4}, {x: 1, y: 5},
@@ -297,12 +299,14 @@ export const levels = {
     }),
     t7: setLevel => ({
         ...baseLevel, _name: "t7", setLevel,
-        pos: {x: 1, y: 1},
+        pos: {x: 1, y: 3},
         onLoad: [
-            $addObjectsOfType(ObjType.lock, {x: 5, y: 1}),
-            $addObjectsOfType(ObjType.key, {x: 3, y: 5}),
+            $addObjectsOfType(ObjType.target, {x: 5, y: 1}),
+            $addObjectsOfType(ObjType.lock, {x: 3, y: 2}),
+            $addObjectsOfType(ObjType.key, {x: 5, y: 5}),
             $addObjectsOfType(ObjType.wall,
-                {x: 1, y: 3}, {x: 2, y: 3}, {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3}),
+                {x: 3, y: 0}, {x: 3, y: 1}, {x: 3, y: 3}, {x: 4, y: 3},
+                {x: 5, y: 3}, {x: 6, y: 3}),
         ],
         nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
     }),
@@ -335,7 +339,7 @@ export const levels = {
         },
     }),
 };
-const firstLevel = levels.t1;
+const firstLevel = levels.t7;
 
 function startLevel(level) {
     const result = Object.assign(level);
