@@ -36,7 +36,7 @@
     outline: none;
 }
 
-.player, .target, .wall {
+.player, .target, .wall, .lock {
     display: flex;
     flex-direction: column;
     justify-content: center;

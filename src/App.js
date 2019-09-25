@@ -111,19 +111,8 @@ function sanitizePlayerPos(pos, level) {
     const x = findCollisionInArray(pos, level.objects);
     if (x !== null) {
         const o = level.objects[x];
-        if (o.type === ObjType.target) {
-            results.score = level.score + 1;
-            level.objects.splice(x, 1);
-            if (numberOfObjTypes(level.objects, ObjType.target) === 0) {
-                return level.nextLevel(level.setLevel);
-            }
-            level.pos.animateEat();
-        } else if (o.type === ObjType.wall) {
-            o.hp -= 1;
-            if (o.hp <= 0) {
-                level.objects.splice(x, 1);
-            }
-            return {};
+        if (typeof o.type.interact === "function") {
+            return o.type.interact(level, results, x);
         } else {
             return {};
         }
@@ -163,9 +152,31 @@ const ObjType = {
         render: () => {
             return <>&#x1f352;</>;
         },
+        interact: (level, next, index) => {
+            next.score = level.score + 1;
+            level.objects.splice(index, 1);
+            console.log(level.objects);
+            if (numberOfObjTypes(level.objects, ObjType.target) === 0) {
+                return level.nextLevel(level.setLevel);
+            }
+            level.pos.animateEat();
+            return next;
+        },
     },
     wall: {
         className: "wall",
+    },
+    lock: {
+        className: "lock",
+        render: () => {
+            return <>&#x1f512;</>;
+        },
+    },
+    key: {
+        className: "lock",
+        render: () => {
+            return <>&#x1f511;</>;
+        },
     },
 };
 
@@ -264,6 +275,15 @@ export const levels = {
         ],
         nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
     }),
+    t7: setLevel => ({
+        ...baseLevel, _name: "t7", setLevel,
+        pos: {x: 1, y: 1},
+        onLoad: [
+            $addObjectsOfType(ObjType.lock, {x: 5, y: 1}),
+            $addObjectsOfType(ObjType.key, {x: 3, y: 5}),
+        ],
+        nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
+    }),
     win: next => setLevel => ({
         ...baseLevel,
         _name: "win",
@@ -293,7 +313,7 @@ export const levels = {
         },
     }),
 };
-const firstLevel = levels.t6;
+const firstLevel = levels.t1;
 
 function startLevel(level) {
     const result = Object.assign(level);
