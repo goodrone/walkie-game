@@ -72,12 +72,20 @@ function Player(props) {
             void elem.offsetWidth;
             elem.classList.add("animate-eat");
         };
+        ctx.pos.animateShake = () => {
+            const elem = ref.current;
+            elem.classList.remove("animate-shake");
+            void elem.offsetWidth;
+            elem.classList.add("animate-shake");
+        };
     };
     React.useEffect(addCallbacks, []);
     return (
         <div className="player" style={style}
             ref={ref}>
             &#x1f642;
+            {ctx.pos.carry &&
+                <span className="carry">{ctx.pos.carry.render()}</span>}
         </div>
     );
 }
@@ -171,11 +179,23 @@ const ObjType = {
         render: () => {
             return <>&#x1f512;</>;
         },
+        interact: (level, next, index) => {
+            if (!level.pos.carry) {
+                level.pos.animateShake();
+                return {};
+            }
+            return level.nextLevel(level.setLevel);
+        },
     },
     key: {
         className: "lock",
         render: () => {
             return <>&#x1f511;</>;
+        },
+        interact: (level, next, index) => {
+            next.pos.carry = ObjType.key;
+            level.objects.splice(index, 1);
+            return next;
         },
     },
 };
@@ -213,7 +233,7 @@ function winAndSetNextByTemplate(template, setLevel) {
 export const levels = {
     t1: setLevel => ({
         ...baseLevel, _name: "t1", setLevel,
-        pos: {x: 2, y: 3},
+        pos: {x: 2, y: 3, carry: ObjType.key},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 4, y: 3}),
         ],
@@ -273,7 +293,7 @@ export const levels = {
                 {x: 5, y: 3}, {x: 5, y: 4}, {x: 5, y: 5},
                 {x: 2, y: 5}, {x: 3, y: 5}, {x: 4, y: 5}),
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels.t7, setLevel),
     }),
     t7: setLevel => ({
         ...baseLevel, _name: "t7", setLevel,
@@ -281,6 +301,8 @@ export const levels = {
         onLoad: [
             $addObjectsOfType(ObjType.lock, {x: 5, y: 1}),
             $addObjectsOfType(ObjType.key, {x: 3, y: 5}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 1, y: 3}, {x: 2, y: 3}, {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3}),
         ],
         nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
     }),
@@ -321,6 +343,9 @@ function startLevel(level) {
     level.objects.length = 0;
     if (Array.isArray(level.onLoad)) {
         level.onLoad.map(f => f(result));
+    }
+    if (level.pos !== undefined) {
+        level.pos.carry = null;
     }
     return result;
 }

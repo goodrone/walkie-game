@@ -53,17 +53,30 @@
     transition: transform 0.3s ease;
 }
 .player.animate-eat {
-    animation-name: example;
+    animation-name: eat;
     animation-duration: 0.3s;
 }
-@keyframes example {
+@keyframes eat {
     0% {transform: scale(1);}
     50% {transform: scale(2);}
     100% {transform: scale(1);}
 }
-
-.target {
+.player.animate-shake {
+    animation: shake 0.1s 2;
 }
+@keyframes shake {
+    0% {transform: translateX(0);}
+    33% {transform: translateX(-6px);}
+    67% {transform: translateX(6px);}
+    100% {transform: translateX(0);}
+}
+.player .carry {
+    position: absolute;
+    top: 15px;
+    left: -1px;
+    font-size: 19px;
+}
+
 .wall {
     border-radius: 40%;
     border: 3px solid #333;
