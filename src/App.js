@@ -422,7 +422,7 @@ export const levels = {
             }, []);
             return (
                 <div className="win-level" style={style}>
-                    {show && <button onClick={next} ref={ref}>&#x25b6;</button>}
+                    {show && <button onClick={next} ref={ref}>&#x25b6;&#xFE0E;</button>}
                 </div>
             );
         },
