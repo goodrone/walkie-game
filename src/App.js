@@ -354,10 +354,10 @@ function startLevel(level) {
     return result;
 }
 
-function Walkie() {
+export function Walkie(props) {
     const [level, setLevel] = React.useState(null);
     React.useEffect(() => {
-        setLevel(startLevel(firstLevel(setLevel)));
+        setLevel(startLevel((props.startLevel || firstLevel)(setLevel)));
     }, []);
     if (level === null) {
         return null;
