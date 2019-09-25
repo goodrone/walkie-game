@@ -14,14 +14,14 @@
     outline: none;
 }
 .map {
-    border: 8px solid #464646;
+    border: 8px solid #232323;
 }
 .win-level {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #050;
+    background: linear-gradient(-45deg, #1b482d, #484a47);
 }
 .win-level button {
     background: #181;

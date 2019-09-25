@@ -226,7 +226,7 @@ export const levels = {
             $addObjectsOfType(ObjType.target, {x: 5, y: 3}),
             $addObjectsOfType(ObjType.wall, {x: 3, y: 2}, {x: 3, y: 3}, {x: 3, y: 4}),
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels.t4, setLevel),
     }),
     t4: setLevel => ({
         ...baseLevel, _name: "t4", setLevel,
@@ -235,6 +235,18 @@ export const levels = {
             $addObjectsOfType(ObjType.target, {x: 2, y: 5}),
             $addObjectsOfType(ObjType.wall,
                 {x: 0, y: 3}, {x: 1, y: 3}, {x: 2, y: 3}, {x: 3, y: 3}, {x: 4, y: 3}),
+        ],
+        nextLevel: winAndSetNextByTemplate(levels.t5, setLevel),
+    }),
+    t5: setLevel => ({
+        ...baseLevel, _name: "t5", setLevel,
+        pos: {x: 3, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target,
+                {x: 1, y: 1}, {x: 1, y: 5}, {x: 5, y: 1}, {x: 5, y: 5}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 1, y: 3}, {x: 3, y: 1}, {x: 5, y: 3}, {x: 3, y: 5},
+                {x: 0, y: 3}, {x: 3, y: 0}, {x: 6, y: 3}, {x: 3, y: 6}),
         ],
         nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
     }),
@@ -267,7 +279,7 @@ export const levels = {
         },
     }),
 };
-const firstLevel = levels.t4;
+const firstLevel = levels.t1;
 
 function startLevel(level) {
     const result = Object.assign(level);
@@ -291,7 +303,7 @@ function Walkie() {
     return (
         <div className="walkie">
             <Ctx.Provider value={level}>
-                <div>{level.score} | {level.objects.length}</div>
+                <div>{level._name}</div>
                 <RenderLevel level={level}/>
             </Ctx.Provider>
         </div>
