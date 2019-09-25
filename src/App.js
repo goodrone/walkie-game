@@ -248,6 +248,20 @@ export const levels = {
                 {x: 1, y: 3}, {x: 3, y: 1}, {x: 5, y: 3}, {x: 3, y: 5},
                 {x: 0, y: 3}, {x: 3, y: 0}, {x: 6, y: 3}, {x: 3, y: 6}),
         ],
+        nextLevel: winAndSetNextByTemplate(levels.t6, setLevel),
+    }),
+    t6: setLevel => ({
+        ...baseLevel, _name: "t6", setLevel,
+        pos: {x: 1, y: 1},
+        onLoad: [
+            $addObjectsOfType(ObjType.target,
+                {x: 5, y: 1}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 3, y: 0}, {x: 3, y: 1}, {x: 3, y: 2}, {x: 3, y: 3},
+                {x: 1, y: 3}, {x: 1, y: 4}, {x: 1, y: 5},
+                {x: 5, y: 3}, {x: 5, y: 4}, {x: 5, y: 5},
+                {x: 2, y: 5}, {x: 3, y: 5}, {x: 4, y: 5}),
+        ],
         nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
     }),
     win: next => setLevel => ({
@@ -279,7 +293,7 @@ export const levels = {
         },
     }),
 };
-const firstLevel = levels.t1;
+const firstLevel = levels.t6;
 
 function startLevel(level) {
     const result = Object.assign(level);
