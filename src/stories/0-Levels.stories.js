@@ -6,6 +6,7 @@ export default {
 };
 
 export const win = () => <Walkie startLevel={levels.win(null)}/>;
+export const chooseLevel = () => <Walkie startLevel={levels.chooseLevel}/>;
 export const level1 = () => <Walkie startLevel={levels.t1}/>;
 export const level2 = () => <Walkie startLevel={levels.t2}/>;
 export const level3 = () => <Walkie startLevel={levels.t3}/>;

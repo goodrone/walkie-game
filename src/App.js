@@ -43,6 +43,22 @@ function Map(props) {
         tabIndex="0" ref={ref} className="map">{props.children}</div>;
 }
 
+function useTimers(timers) {
+    // Caller should make sure the list of timers doesn't change
+    React.useEffect(() => {
+        const ids = Array(timers.length);
+        for (let i = 0; i < timers.length; i++) {
+            ids[i] = setTimeout(timers[i][0], timers[i][1]);
+        }
+        return () => {
+            for (let i = 0; i < ids.length; i++) {
+                clearTimeout(ids[i]);
+            }
+        };
+    // eslint-disable-next-line
+    }, []);
+}
+
 function calcCellPos(pos, level) {
     return {
         x: pos.x * level.d,
@@ -403,35 +419,73 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
     }),
     win: next => setLevel => ({
-        ...baseLevel,
-        _name: "win",
-        setLevel,
-        render: function Win() {
-            const b = baseLevel;
-            const width = b.width * b.d;
-            const height = b.height * b.d;
-            const style = {
-                width: `${width}px`, height: `${height}px`,
-                tabIndex: 0,
-            };
-            const [show, setShow] = React.useState(false);
+        ...baseLevel, _name: "win", setLevel,
+        render: function Win({ level }) {
+            const [state, setState] = React.useState({});
             const ref = React.useRef();
-            React.useEffect(() => {
-                const t = setTimeout(() => {
-                    setShow(true);
-                    ref.current.focus();
-                }, inputCooldownMs);
-                return () => clearTimeout(t);
-            }, []);
+            const showNextButton = () => {
+                setState(prev => ({...prev, next: true}));
+                ref.current.focus();
+            };
+            const showLevelsButton = () => {
+                setState(prev => ({...prev, list: true}));
+            };
+            useTimers([
+                [showNextButton, inputCooldownMs],
+                [showLevelsButton, 2000],
+            ]);
+            const listLevels = () => setLevel(startLevel(levels.chooseLevel(setLevel)));
             return (
-                <div className="win-level" style={style}>
-                    {show && <button onClick={next} ref={ref}>&#x25b6;&#xFE0E;</button>}
+                <div className="win-level" style={computeLevelStyle(level)}>
+                    {state.next && <button onClick={next} ref={ref}
+                        className="next">&#x25b6;&#xFE0E;</button>}
+                    {state.list && <button onClick={listLevels}
+                        className="list"></button>}
+                </div>
+            );
+        },
+    }),
+    chooseLevel: setLevel => ({
+        ...baseLevel, _name: "choose", setLevel,
+        render: ({ level }) => {
+            const onChoose = level => setLevel(startLevel(level(setLevel)));
+            return (
+                <div className="choose-level" style={computeLevelStyle(level)}>
+                    <ChooseLevels onChoose={onChoose} levels={
+                        [
+                            levels.t1, levels.t2, levels.t3, levels.t4, levels.t5,
+                            levels.t6, levels.t7, levels.t8,
+                        ]}/>
                 </div>
             );
         },
     }),
 };
 const firstLevel = levels.t1;
+
+function computeLevelStyle(level) {
+    const width = level.width * level.d;
+    const height = level.height * level.d;
+    const style = {
+        width: `${width}px`, height: `${height}px`,
+        tabIndex: 0,
+    };
+    return style;
+}
+
+function ChooseLevels({ onChoose, levels }) {
+    return (
+        <div className="level-list">
+            {levels.map((level, i) => {
+                return (
+                    <button key={i} onClick={() => onChoose(level)}>
+                        {i + 1}
+                    </button>
+                );
+            })}
+        </div>
+    );
+}
 
 function startLevel(level) {
     const result = Object.assign(level);
@@ -442,6 +496,7 @@ function startLevel(level) {
     if (level.pos !== undefined) {
         level.pos.carry = null;
     }
+    console.log("startLevel", result);
     return result;
 }
 
