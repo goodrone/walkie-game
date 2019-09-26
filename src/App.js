@@ -466,10 +466,14 @@ export function Walkie(props) {
 }
 
 function App() {
+  const version = document.getElementById("root").attributes["data-version"].value;
   return (
-      <div className="app">
-          <Walkie/>
-      </div>
+      <>
+          <div className="app">
+              <Walkie/>
+          </div>
+          <footer>{version}</footer>
+      </>
   );
 }
 

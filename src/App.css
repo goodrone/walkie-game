@@ -1,3 +1,6 @@
+body {
+    color: #eee;
+}
 .app {
     display: flex;
     flex-direction: column;
@@ -5,7 +8,15 @@
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background: #000;
-    color: #eee;
+}
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: small;
+    color: #888;
 }
 .walkie {
     margin: auto;
