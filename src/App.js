@@ -227,19 +227,20 @@ const ObjType = {
         className: "lock",
         render: () => <>&#x1f512;</>,
         interact: (level, next, index) => {
-            if (!level.pos.carry) {
-                level.pos.animateShake();
-                return {};
+            if (level.pos.carry && level.pos.carry.what === ObjType.key.what) {
+                level.objects.splice(index, 1);
+                next.pos.carry = null;
+                level.pos.animateEat();
+                return next;
             }
-            level.objects.splice(index, 1);
-            next.pos.carry = null;
-            level.pos.animateEat();
-            return next;
+            level.pos.animateShake();
+            return {};
         },
     },
     key: {
         className: "lock",
         render: () => <>&#x1f511;</>,
+        what: "key",
         interact: carryItem,
     },
     figure: {
@@ -443,6 +444,26 @@ export const levels = {
     }),
     t10: setLevel => ({
         ...baseLevel, _name: "t10", setLevel,
+        pos: {x: 2, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 6, y: 0}, {x: 6, y: 3}, {x: 6, y: 6}),
+            $addObjectsOfType(ObjType.lock, {x: 4, y: 3}),
+            $addObjectsOfType({...ObjType.npc, wants: "green"}, {x: 4, y: 1}),
+            $addObjectsOfType({...ObjType.npc, wants: "red"}, {x: 4, y: 5}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 0, y: 0}, {x: 0, y: 2}, {x: 0, y: 4}, {x: 0, y: 6},
+                {x: 4, y: 0}, {x: 4, y: 6},
+                {x: 4, y: 2}, {x: 5, y: 2}, {x: 6, y: 2},
+                {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4},
+            ),
+            $addObjectsOfType(ObjType.key, {x: 0, y: 1}),
+            $addObjectsOfType({...ObjType.figure, what: "red"}, {x: 0, y: 3}),
+            $addObjectsOfType({...ObjType.figure, what: "green"}, {x: 0, y: 5}),
+        ],
+        nextLevel: winAndSetNextByTemplate(levels.t11, setLevel),
+    }),
+    t11: setLevel => ({
+        ...baseLevel, _name: "t11", setLevel,
         pos: {x: 3, y: 2},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 6}),
@@ -518,6 +539,7 @@ export const levels = {
                         [
                             levels.t1, levels.t2, levels.t3, levels.t4, levels.t5,
                             levels.t6, levels.t7, levels.t8, levels.t9, levels.t10,
+                            levels.t11,
                         ]}/>
                 </div>
             );

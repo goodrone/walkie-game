@@ -17,3 +17,4 @@ export const level7 = () => <Walkie startLevel={levels.t7}/>;
 export const level8 = () => <Walkie startLevel={levels.t8}/>;
 export const level9 = () => <Walkie startLevel={levels.t9}/>;
 export const level10 = () => <Walkie startLevel={levels.t10}/>;
+export const level11 = () => <Walkie startLevel={levels.t11}/>;
