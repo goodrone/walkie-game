@@ -83,15 +83,16 @@ function Player(props) {
     const cell = calcCellPos(ctx.pos, ctx);
     const style = cellPosToStyle(cell);
     const addCallbacks = () => {
+        const animateClasses = ["animate-eat", "animate-shake"];
         ctx.pos.animateEat = () => {
             const elem = ref.current;
-            elem.classList.remove("animate-eat");
+            elem.classList.remove(...animateClasses);
             void elem.offsetWidth;
             elem.classList.add("animate-eat");
         };
         ctx.pos.animateShake = () => {
             const elem = ref.current;
-            elem.classList.remove("animate-shake");
+            elem.classList.remove(...animateClasses);
             void elem.offsetWidth;
             elem.classList.add("animate-shake");
         };
