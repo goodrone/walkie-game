@@ -405,7 +405,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t8, setLevel),
     }),
     t8: setLevel => ({
-        ...baseLevel, _name: "t8", setLevel,
+        ...baseLevel, _name: "t9", setLevel,
         pos: {x: 3, y: 1},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 5}),
@@ -415,6 +415,19 @@ export const levels = {
             $addObjectsOfType(ObjType.wall,
                 {x: 0, y: 3}, {x: 1, y: 3}, {x: 2, y: 3},
                 {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}),
+        ],
+        nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
+    }),
+    t9: setLevel => ({
+        ...baseLevel, _name: "t9", setLevel,
+        pos: {x: 1, y: 1},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 5, y: 1}),
+            $addObjectsOfType(ObjType.key, {x: 5, y: 5}),
+            $addObjectsOfType(ObjType.lock,
+                {x: 3, y: 0}, {x: 3, y: 1}, {x: 3, y: 2},
+                {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}),
+            $addObjectsOfType(ObjType.wall, {x: 3, y: 3}),
         ],
         nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
     }),
@@ -454,7 +467,7 @@ export const levels = {
                     <ChooseLevels onChoose={onChoose} levels={
                         [
                             levels.t1, levels.t2, levels.t3, levels.t4, levels.t5,
-                            levels.t6, levels.t7, levels.t8,
+                            levels.t6, levels.t7, levels.t8, levels.t9,
                         ]}/>
                 </div>
             );
