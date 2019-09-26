@@ -464,6 +464,27 @@ export const levels = {
     }),
     t11: setLevel => ({
         ...baseLevel, _name: "t11", setLevel,
+        pos: {x: 1, y: 2},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 5, y: 6}),
+            $addObjectsOfType(ObjType.lock, {x: 5, y: 4}),
+            $addObjectsOfType({...ObjType.npc, wants: "rgb(0,220,184)"}, {x: 1, y: 4}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 1, y: 0}, {x: 3, y: 0}, {x: 5, y: 0},
+                {x: 0, y: 4}, {x: 2, y: 4}, {x: 3, y: 4}, {x: 4, y: 4}, {x: 6, y: 4},
+                {x: 3, y: 5}, {x: 3, y: 6},
+            ),
+            $addObjectsOfType(ObjType.key, {x: 1, y: 6}),
+            // TODO: add randiomization
+            $addObjectsOfType({...ObjType.figure, what: "rgb(255,111,189)"}, {x: 0, y: 0}),
+            $addObjectsOfType({...ObjType.figure, what: "rgb(244,170,0)"}, {x: 2, y: 0}),
+            $addObjectsOfType({...ObjType.figure, what: "rgb(0,220,184)"}, {x: 4, y: 0}),
+            $addObjectsOfType({...ObjType.figure, what: "rgb(55,183,255)"}, {x: 6, y: 0}),
+        ],
+        nextLevel: winAndSetNextByTemplate(levels.t12, setLevel),
+    }),
+    t12: setLevel => ({
+        ...baseLevel, _name: "t12", setLevel,
         pos: {x: 3, y: 2},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 6}),
@@ -488,16 +509,12 @@ export const levels = {
                 ];
                 console.assert(colors.length === coords.length);
                 for (let i = 0; i < coords.length; i++) {
-                    level.objects.push({
-                        ...coords[i],
-                        type: {...ObjType.figure, what: colors[i]},
-                    });
+                    level.objects.push({ ...coords[i],
+                        type: {...ObjType.figure, what: colors[i]}});
                 }
                 const index = Math.floor(Math.random() * colors.length);
-                level.objects.push({
-                    x: 3, y: 4,
-                    type: {...ObjType.npc, wants: colors[index]},
-                });
+                level.objects.push({ x: 3, y: 4,
+                    type: {...ObjType.npc, wants: colors[index]}});
             },
         ],
         nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
@@ -539,7 +556,7 @@ export const levels = {
                         [
                             levels.t1, levels.t2, levels.t3, levels.t4, levels.t5,
                             levels.t6, levels.t7, levels.t8, levels.t9, levels.t10,
-                            levels.t11,
+                            levels.t11, levels.t12,
                         ]}/>
                 </div>
             );
