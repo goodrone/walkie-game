@@ -66,7 +66,6 @@ function Player(props) {
     const ref = React.useRef();
     const cell = calcCellPos(ctx.pos, ctx);
     const style = cellPosToStyle(cell);
-    // Prevent exhaustive-deps linter rule from firing
     const addCallbacks = () => {
         ctx.pos.animateEat = () => {
             const elem = ref.current;
@@ -80,12 +79,14 @@ function Player(props) {
             void elem.offsetWidth;
             elem.classList.add("animate-shake");
         };
-    };
+    }; // Prevent exhaustive-deps eslint rule from firing
     React.useEffect(addCallbacks, []);
     return (
         <div className="player" style={style}
             ref={ref}>
+            {/* eslint-disable */}
             &#x1f642;
+            {/* eslint-enable */}
             {ctx.pos.carry &&
                 <span className="carry">
                     {ctx.pos.carry.render({
@@ -97,7 +98,7 @@ function Player(props) {
     );
 }
 
-function Object_(props) {
+function Obj(props) {
     const ctx = React.useContext(Ctx);
     const cell = calcCellPos(props.pos, ctx);
     const style = cellPosToStyle(cell);
@@ -260,7 +261,9 @@ const ObjType = {
                     <div className="popover">
                         <div className="speech">
                             <div className="who">
+                                {/* eslint-disable */}
                                 &#x1f468;&#x1f3fb;
+                                {/* eslint-enable */}
                             </div>
                             <div className="what">
                                 <Square color="red" d={40} shadow/>
@@ -295,7 +298,7 @@ const baseLevel = {
     render: ({ level }) => {
         return (
             <Map onSetPlayerPos={level.walk}>
-                {level.objects.map((pos, i) => <Object_ key={i} pos={pos}/>)}
+                {level.objects.map((pos, i) => <Obj key={i} pos={pos}/>)}
                 <Player/>
                 {level.popover && level.popover()}
             </Map>
@@ -448,9 +451,10 @@ export function Walkie(props) {
         _setLevel(...args);
 
     };
-    React.useEffect(() => {
+    const onStart = () => {
         setLevel(startLevel((props.startLevel || firstLevel)(setLevel)));
-    }, []);
+    }; // Prevent exhaustive-deps eslint rule from firing
+    React.useEffect(onStart, []);
     if (level === null) {
         return null;
     }
