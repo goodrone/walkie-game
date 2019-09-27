@@ -17,7 +17,17 @@ footer {
     text-align: center;
     font-size: x-small;
     color: #888;
+    margin-bottom: 1em;
 }
+footer.dev {
+    color: #e77;
+}
+footer.hidden {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 2s, opacity 2s linear;
+}
+
 .walkie {
     margin: auto;
 }

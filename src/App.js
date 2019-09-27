@@ -620,23 +620,37 @@ export function Walkie(props) {
     return (
         <div className="walkie">
             <Ctx.Provider value={level}>
-                <div>{level._name}</div>
                 <RenderLevel level={level}/>
             </Ctx.Provider>
         </div>
     );
 }
 
-function App() {
-  const version = document.getElementById("root").attributes["data-version"].value;
-  return (
-      <>
-          <div className="app">
-              <Walkie/>
-          </div>
-          <footer>{version} &mdash; https://github.com/goodrone/walkie-game</footer>
-      </>
-  );
+function Footer() {
+    const [show, setShow] = React.useState(true);
+    useTimers([
+        [() => !isDev && setShow(false), 3000],
+    ]);
+    const version = document.getElementById("root").attributes["data-version"].value;
+    const classNames = (isDev ? "dev" : "") + (show ? "" : " hidden");
+    return (
+        <footer className={classNames}>
+            {version} &middot; https://github.com/goodrone/walkie-game
+        </footer>
+    );
 }
+
+function App() {
+    return (
+        <>
+            <div className="app">
+                <Walkie/>
+            </div>
+            <Footer/>
+        </>
+    );
+}
+
+const isDev = process.env.NODE_ENV !== 'production';
 
 export default App;
