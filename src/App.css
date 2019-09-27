@@ -214,6 +214,7 @@ footer.hidden {
 }
 .player .carry .figure {
     transform: scale(0.5);
+    border: 1px solid #000;
 }
 
 .wall {

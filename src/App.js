@@ -314,10 +314,13 @@ const ObjType = {
 
 function $addObjectsOfType(type, ...args) {
     return level => {
-        for (let i = 0; i < args.length; i++) {
-            level.objects.push({...args[i], type});
-        }
+        addObjectsOfType(level, type, ...args);
     };
+}
+function addObjectsOfType(level, type, ...args) {
+    for (let i = 0; i < args.length; i++) {
+        level.objects.push({...args[i], type});
+    }
 }
 function shuffle(array) {
     const n = array.length;
@@ -329,6 +332,34 @@ function shuffle(array) {
     }
     return array;
 }
+function chooseN(array, n) {
+    let len = array.length;
+    if (n > len) {
+        throw new RangeError(`chooseN: cannot choose ${n} of ${len}`);
+    }
+    for (let i = 0; i < n; i++) {
+        const x = i + Math.floor(Math.random() * (len - i));
+        if (x !== i) {
+            [array[i], array[x]] = [array[x], array[i]];
+        }
+    };
+    return array.slice(0, n);
+};
+
+export const colors = [
+    // darker colors
+    "rgb(169,0,0)",
+    "rgb(77,71,0)",
+    "rgb(0,106,46)",
+    "rgb(0,82,158)",
+    "rgb(129,0,130)",
+    // brighter colors
+    "rgb(255,175,0)",
+    "rgb(0,218,231)",
+    "rgb(255,121,216)",
+    "rgb(255,184,38)",
+    "rgb(0,255,45)",
+];
 
 const baseLevel = {
     _name: "base",
@@ -433,15 +464,18 @@ export const levels = {
     t8: setLevel => ({
         ...baseLevel, _name: "t9", setLevel,
         pos: {x: 3, y: 1},
-        onLoad: [
-            $addObjectsOfType(ObjType.target, {x: 3, y: 5}),
-            $addObjectsOfType({...ObjType.npc, wants: "red"}, {x: 3, y: 3}),
-            $addObjectsOfType({...ObjType.figure, what: "red"}, {x: 1, y: 1}),
-            $addObjectsOfType({...ObjType.figure, what: "green"}, {x: 5, y: 1}),
-            $addObjectsOfType(ObjType.wall,
+        onLoad: level => {
+            const add = (...args) => addObjectsOfType(level, ...args);
+            add(ObjType.target, {x: 3, y: 5});
+            const [a, b] = chooseN(colors, 2);
+            const c = Math.random() < .5 ? a : b;
+            add({...ObjType.npc, wants: c}, {x: 3, y: 3});
+            add({...ObjType.figure, what: a}, {x: 1, y: 1});
+            add({...ObjType.figure, what: b}, {x: 5, y: 1});
+            add(ObjType.wall,
                 {x: 0, y: 3}, {x: 1, y: 3}, {x: 2, y: 3},
-                {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}),
-        ],
+                {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3});
+        },
         nextLevel: winAndSetNextByTemplate(levels.t9, setLevel),
     }),
     t9: setLevel => ({
@@ -609,6 +643,11 @@ function startLevel(level) {
     level.objects.length = 0;
     if (Array.isArray(level.onLoad)) {
         level.onLoad.map(f => f(result));
+    } else if (typeof level.onLoad === "function") {
+        level.onLoad(level);
+    } else if (level.onLoad !== undefined){
+        console.warn(level);
+        throw new TypeError(`Unknown type for onLoad: ${typeof level.onLoad}`);
     }
     if (level.pos !== undefined) {
         level.pos.carry = null;

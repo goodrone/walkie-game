@@ -1,5 +1,6 @@
 import React from 'react';
-import { Walkie, levels } from '../App.js';
+import { Walkie, levels, colors } from '../App.js';
+import './style.css';
 
 export default {
   title: 'Levels',
@@ -19,3 +20,29 @@ export const level9 = () => <Walkie startLevel={levels.t9}/>;
 export const level10 = () => <Walkie startLevel={levels.t10}/>;
 export const level11 = () => <Walkie startLevel={levels.t11}/>;
 export const level12 = () => <Walkie startLevel={levels.t12}/>;
+
+function ColorList({ colors }) {
+    return (
+        <div className="color-list">
+            {colors.map((c, i) => <div style={{background: c}} key={i}/>)}
+        </div>
+    );
+}
+
+function PairwiseColors({ colors }) {
+    return (
+        <>
+            {colors.map((c, i) => <ColorList key={i}
+                colors={[c, colors[(i + 1) % colors.length]]}/>)}
+        </>
+    );
+}
+
+export const distinctColors = () => {
+    return (
+        <>
+            <ColorList colors={colors}/>
+            <PairwiseColors colors={colors}/>
+        </>
+    );
+};
