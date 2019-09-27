@@ -20,6 +20,9 @@ function Map(props) {
         const p = e.touches[0];
         const rx = p.clientX - (rect.left + playerRect.x) - playerRect.width / 2;
         const ry = p.clientY - (rect.top + playerRect.y) - playerRect.height / 2;
+        if (Math.abs(rx) < playerRect.width / 2 && Math.abs(ry) < playerRect.height / 2) {
+            return;
+        }
         if (ry > rx) {
             if (rx + ry > 0) moveDown();
             else moveLeft();
