@@ -30,6 +30,7 @@ footer.hidden {
 
 .walkie {
     margin: auto;
+    user-select: none;
 }
 .map:focus {
     outline: none;
