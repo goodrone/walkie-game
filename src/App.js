@@ -276,6 +276,9 @@ const ObjType = {
                 level.pos.animateEat();
                 return next;
             }
+            if (level.pos.carry) {
+                console.log("npc.interact", level.pos.carry.what, o.type.wants);
+            }
             level.popover = function Popover() {
                 const [ready, setReady] = React.useState();
                 const ref = React.useRef();
@@ -345,6 +348,10 @@ function chooseN(array, n) {
     };
     return array.slice(0, n);
 };
+function pickRandom(array) {
+    const x = Math.floor(Math.random() * array.length);
+    return array[x];
+}
 
 export const colors = [
     // darker colors
@@ -357,7 +364,6 @@ export const colors = [
     "rgb(255,175,0)",
     "rgb(0,218,231)",
     "rgb(255,121,216)",
-    "rgb(255,184,38)",
     "rgb(0,255,45)",
 ];
 
@@ -517,22 +523,24 @@ export const levels = {
     t11: setLevel => ({
         ...baseLevel, _name: "t11", setLevel,
         pos: {x: 1, y: 2},
-        onLoad: [
-            $addObjectsOfType(ObjType.target, {x: 5, y: 6}),
-            $addObjectsOfType(ObjType.lock, {x: 5, y: 4}),
-            $addObjectsOfType({...ObjType.npc, wants: "rgb(0,220,184)"}, {x: 1, y: 4}),
-            $addObjectsOfType(ObjType.wall,
+        onLoad: level => {
+            const add = (...args) => addObjectsOfType(level, ...args);
+            const cc = chooseN(colors, 4);
+            const c = pickRandom(cc);
+            add(ObjType.target, {x: 5, y: 6});
+            add(ObjType.lock, {x: 5, y: 4});
+            add({...ObjType.npc, wants: c}, {x: 1, y: 4});
+            add(ObjType.wall,
                 {x: 1, y: 0}, {x: 3, y: 0}, {x: 5, y: 0},
                 {x: 0, y: 4}, {x: 2, y: 4}, {x: 3, y: 4}, {x: 4, y: 4}, {x: 6, y: 4},
                 {x: 3, y: 5}, {x: 3, y: 6},
-            ),
-            $addObjectsOfType(ObjType.key, {x: 1, y: 6}),
-            // TODO: add randiomization
-            $addObjectsOfType({...ObjType.figure, what: "rgb(255,111,189)"}, {x: 0, y: 0}),
-            $addObjectsOfType({...ObjType.figure, what: "rgb(244,170,0)"}, {x: 2, y: 0}),
-            $addObjectsOfType({...ObjType.figure, what: "rgb(0,220,184)"}, {x: 4, y: 0}),
-            $addObjectsOfType({...ObjType.figure, what: "rgb(55,183,255)"}, {x: 6, y: 0}),
-        ],
+            );
+            add(ObjType.key, {x: 1, y: 6});
+            add({...ObjType.figure, what: cc[0]}, {x: 0, y: 0});
+            add({...ObjType.figure, what: cc[1]}, {x: 2, y: 0});
+            add({...ObjType.figure, what: cc[2]}, {x: 4, y: 0});
+            add({...ObjType.figure, what: cc[3]}, {x: 6, y: 0});
+        },
         nextLevel: winAndSetNextByTemplate(levels.t12, setLevel),
     }),
     t12: setLevel => ({
