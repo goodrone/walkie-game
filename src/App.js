@@ -233,6 +233,10 @@ const ObjType = {
     },
     wall: {
         className: "wall",
+        interact: level => {
+            level.pos.animateShake();
+            return {};
+        },
     },
     lock: {
         className: "lock",
