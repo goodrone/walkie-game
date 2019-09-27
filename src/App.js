@@ -290,7 +290,7 @@ const ObjType = {
                     ready && level.setLevel(prev => ({...prev, popover: null}));
                 };
                 return (
-                    <div className="popover">
+                    <div className="popover" onTouchStart={e => e.stopPropagation()}>
                         <div className="speech">
                             <div className="who">
                                 {/* eslint-disable */}
