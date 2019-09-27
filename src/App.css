@@ -197,6 +197,14 @@ footer.hidden {
     67% {transform: translateX(6px);}
     100% {transform: translateX(0);}
 }
+.player.animate-drop {
+    animation: drop 0.3s;
+}
+@keyframes drop {
+    0% {transform: scale(1);}
+    50% {transform: scale(0.7);}
+    100% {transform: scale(1);}
+}
 .player .carry {
     position: absolute;
     top: 15px;

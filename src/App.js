@@ -21,6 +21,9 @@ function Map(props) {
         const rx = p.clientX - (rect.left + playerRect.x) - playerRect.width / 2;
         const ry = p.clientY - (rect.top + playerRect.y) - playerRect.height / 2;
         if (Math.abs(rx) < playerRect.width / 2 && Math.abs(ry) < playerRect.height / 2) {
+            if (ctx.pos.carry) {
+                ctx.setLevel(dropItem(ctx));
+            }
             return;
         }
         if (ry > rx) {
@@ -86,19 +89,16 @@ function Player(props) {
     const cell = calcCellPos(ctx.pos, ctx);
     const style = cellPosToStyle(cell);
     const addCallbacks = () => {
-        const animateClasses = ["animate-eat", "animate-shake"];
-        ctx.pos.animateEat = () => {
+        const animateClasses = ["animate-eat", "animate-shake", "animate-drop"];
+        const addAnimateFunc = className => () => {
             const elem = ref.current;
             elem.classList.remove(...animateClasses);
             void elem.offsetWidth;
-            elem.classList.add("animate-eat");
+            elem.classList.add(className);
         };
-        ctx.pos.animateShake = () => {
-            const elem = ref.current;
-            elem.classList.remove(...animateClasses);
-            void elem.offsetWidth;
-            elem.classList.add("animate-shake");
-        };
+        ctx.pos.animateEat = addAnimateFunc("animate-eat");
+        ctx.pos.animateShake = addAnimateFunc("animate-shake");
+        ctx.pos.animateDrop = addAnimateFunc("animate-drop");
     }; // Prevent exhaustive-deps eslint rule from firing
     React.useEffect(addCallbacks, []);
     return (
@@ -198,15 +198,22 @@ function Square({ d, color, shadow, className }) {
 
 function carryItem(level, next, index) {
     if (level.pos.carry) {
-        next.pos.carry = level.objects.splice(index, 1, {
-            ...next.pos,
-            type: level.pos.carry,
-        })[0].type;
-        next.pos.x = level.pos.x;
-        next.pos.y = level.pos.y;
+        level.pos.animateShake();
+        return {};
     } else {
         next.pos.carry = level.objects.splice(index, 1)[0].type;
+        level.pos.animateEat();
     }
+    return next;
+}
+function dropItem(level) {
+    const next = {...level, pos: {...level.pos}};
+    next.objects.push({
+        ...level.pos,
+        type: level.pos.carry,
+    });
+    next.pos.carry = null;
+    level.pos.animateDrop();
     return next;
 }
 
