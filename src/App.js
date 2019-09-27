@@ -494,21 +494,24 @@ export const levels = {
     t10: setLevel => ({
         ...baseLevel, _name: "t10", setLevel,
         pos: {x: 2, y: 3},
-        onLoad: [
-            $addObjectsOfType(ObjType.target, {x: 6, y: 0}, {x: 6, y: 3}, {x: 6, y: 6}),
-            $addObjectsOfType(ObjType.lock, {x: 4, y: 3}),
-            $addObjectsOfType({...ObjType.npc, wants: "green"}, {x: 4, y: 1}),
-            $addObjectsOfType({...ObjType.npc, wants: "red"}, {x: 4, y: 5}),
-            $addObjectsOfType(ObjType.wall,
+        onLoad: level => {
+            const add = (...args) => addObjectsOfType(level, ...args);
+            const cc = chooseN(colors, 2);
+            add(ObjType.target, {x: 6, y: 0}, {x: 6, y: 3}, {x: 6, y: 6});
+            add(ObjType.lock, {x: 4, y: 3});
+            add({...ObjType.npc, wants: cc[0]}, {x: 4, y: 1});
+            add({...ObjType.npc, wants: cc[1]}, {x: 4, y: 5});
+            add(ObjType.wall,
                 {x: 0, y: 0}, {x: 0, y: 2}, {x: 0, y: 4}, {x: 0, y: 6},
                 {x: 4, y: 0}, {x: 4, y: 6},
                 {x: 4, y: 2}, {x: 5, y: 2}, {x: 6, y: 2},
                 {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4},
-            ),
-            $addObjectsOfType(ObjType.key, {x: 0, y: 1}),
-            $addObjectsOfType({...ObjType.figure, what: "red"}, {x: 0, y: 3}),
-            $addObjectsOfType({...ObjType.figure, what: "green"}, {x: 0, y: 5}),
-        ],
+            );
+            add(ObjType.key, {x: 0, y: 1});
+            shuffle(cc);
+            add({...ObjType.figure, what: cc[0]}, {x: 0, y: 3});
+            add({...ObjType.figure, what: cc[1]}, {x: 0, y: 5});
+        },
         nextLevel: winAndSetNextByTemplate(levels.t11, setLevel),
     }),
     t11: setLevel => ({
