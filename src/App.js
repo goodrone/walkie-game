@@ -573,7 +573,7 @@ export const levels = {
                     type: {...ObjType.npc, wants: c}});
             },
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
         ...baseLevel, _name: "win", setLevel,
