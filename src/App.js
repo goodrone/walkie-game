@@ -554,27 +554,23 @@ export const levels = {
                 {x: 0, y: 0}, {x: 0, y: 2}, {x: 0, y: 4}, {x: 0, y: 6},
                 {x: 6, y: 0}, {x: 6, y: 2}, {x: 6, y: 4}, {x: 6, y: 6},
                 {x: 2, y: 0}, {x: 4, y: 0},
+                {x: 1, y: 6}, {x: 5, y: 6},
             ),
             level => {
-                const colors = ["rgb(255,111,189)","rgb(255,118,24)",
-                    "rgb(255,146,0)","rgb(227,177,0)","rgb(120,202,0)",
-                    "rgb(0,217,129)","rgb(0,220,223)","rgb(0,211,255)",
-                    "rgb(0,190,255)","rgb(182,161,255)","rgb(255,130,255)"];
                 shuffle(colors);
                 const coords = [
                     {x: 1, y: 0}, {x: 3, y: 0}, {x: 5, y: 0},
                     {x: 0, y: 1}, {x: 0, y: 3}, {x: 0, y: 5},
                     {x: 6, y: 1}, {x: 6, y: 3}, {x: 6, y: 5},
-                    {x: 1, y: 6}, {x: 5, y: 6},
                 ];
                 console.assert(colors.length === coords.length);
                 for (let i = 0; i < coords.length; i++) {
                     level.objects.push({ ...coords[i],
                         type: {...ObjType.figure, what: colors[i]}});
                 }
-                const index = Math.floor(Math.random() * colors.length);
+                const c = pickRandom(colors);
                 level.objects.push({ x: 3, y: 4,
-                    type: {...ObjType.npc, wants: colors[index]}});
+                    type: {...ObjType.npc, wants: c}});
             },
         ],
         nextLevel: winAndSetNextByTemplate(levels.t1, setLevel),
