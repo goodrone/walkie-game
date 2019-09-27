@@ -634,7 +634,7 @@ function App() {
           <div className="app">
               <Walkie/>
           </div>
-          <footer>{version}</footer>
+          <footer>{version} &mdash; https://github.com/goodrone/walkie-game</footer>
       </>
   );
 }
