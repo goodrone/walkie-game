@@ -110,6 +110,7 @@ function Player(props) {
             {ctx.pos.carry &&
                 <span className="carry">
                     {ctx.pos.carry.render({
+                        level: ctx,
                         className: ctx.pos.carry.className,
                         it: ctx.pos.carry,
                     })}
@@ -125,7 +126,7 @@ function Obj(props) {
     const type = props.pos.type;
     return (
         <div className={type.className} style={style}>
-            {type.render && type.render({it: props.pos.type})}
+            {type.render && type.render({level: ctx, it: props.pos.type})}
         </div>
     );
 }
@@ -196,6 +197,19 @@ function Square({ d, color, shadow, className }) {
     );
 }
 
+function Triangle({ color, className, angle, d }) {
+    const style = {
+        margin: "auto",
+    };
+    return (
+        <svg width={d} height={d} viewBox="0 0 100 100" style={style} className={className}>
+            <g fill={color} transform={`rotate(${angle || 0} 50 50)`}>
+                <polygon points="50,15 100,100 0,100"/>
+            </g>
+        </svg>
+    );
+}
+
 function carryItem(level, next, index) {
     if (level.pos.carry) {
         level.pos.animateShake();
@@ -260,9 +274,14 @@ const ObjType = {
     },
     figure: {
         className: "figure",
-        render: (props) => (
-            <Square color={props.it.what} d={30} className={(props || {}).className || null}/>
-        ),
+        shape: Square,
+        render: (props) => {
+            const d = props.level.d * 2/3;
+            const Shape = props.it.shape;
+            return <Shape d={d}/>;
+            return <Shape color={props.it.what} d={d} angle={props.it.angle}
+                className={props.className || null}/>;
+        },
         interact: carryItem,
     },
     npc: {
@@ -292,16 +311,16 @@ const ObjType = {
                 const dismiss = e => {
                     ready && level.setLevel(prev => ({...prev, popover: null}));
                 };
+                const Shape = o.type.shape;
                 return (
                     <div className="popover" onTouchStart={e => e.stopPropagation()}>
                         <div className="speech">
                             <div className="who">
-                                {/* eslint-disable */}
+                                {/* eslint-disable-next-line */}
                                 &#x1f468;&#x1f3fb;
-                                {/* eslint-enable */}
                             </div>
                             <div className="what">
-                                <Square color={o.type.wants} d={40} shadow/>
+                                <Shape d={45}/>
                             </div>
                         </div>
                         <button onClick={dismiss} className={ready && "show"} ref={ref}>
@@ -475,9 +494,11 @@ export const levels = {
             add(ObjType.target, {x: 3, y: 5});
             const [a, b] = chooseN(colors, 2);
             const c = Math.random() < .5 ? a : b;
-            add({...ObjType.npc, wants: c}, {x: 3, y: 3});
-            add({...ObjType.figure, what: a}, {x: 1, y: 1});
-            add({...ObjType.figure, what: b}, {x: 5, y: 1});
+            const figure = c => ({ d }) => <Square color={c} d={d}/>;
+            const shape = c => ({...ObjType.figure, what: c, shape: figure(c)});
+            add(shape(a), {x: 1, y: 1});
+            add(shape(b), {x: 5, y: 1});
+            add({...ObjType.npc, shape: figure(c), wants: c}, {x: 3, y: 3});
             add(ObjType.wall,
                 {x: 0, y: 3}, {x: 1, y: 3}, {x: 2, y: 3},
                 {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3});
@@ -502,11 +523,8 @@ export const levels = {
         pos: {x: 2, y: 3},
         onLoad: level => {
             const add = (...args) => addObjectsOfType(level, ...args);
-            const cc = chooseN(colors, 2);
             add(ObjType.target, {x: 6, y: 0}, {x: 6, y: 3}, {x: 6, y: 6});
             add(ObjType.lock, {x: 4, y: 3});
-            add({...ObjType.npc, wants: cc[0]}, {x: 4, y: 1});
-            add({...ObjType.npc, wants: cc[1]}, {x: 4, y: 5});
             add(ObjType.wall,
                 {x: 0, y: 0}, {x: 0, y: 2}, {x: 0, y: 4}, {x: 0, y: 6},
                 {x: 4, y: 0}, {x: 4, y: 6},
@@ -514,9 +532,15 @@ export const levels = {
                 {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4},
             );
             add(ObjType.key, {x: 0, y: 1});
+            const cc = chooseN(colors, 2);
+            const render = c => ({ d }) => <Square color={c} d={d}/>;
+            const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+            const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+            add(npc(cc[0]), {x: 4, y: 1});
+            add(npc(cc[1]), {x: 4, y: 5});
             shuffle(cc);
-            add({...ObjType.figure, what: cc[0]}, {x: 0, y: 3});
-            add({...ObjType.figure, what: cc[1]}, {x: 0, y: 5});
+            add(figure(cc[0]), {x: 0, y: 3});
+            add(figure(cc[1]), {x: 0, y: 5});
         },
         nextLevel: winAndSetNextByTemplate(levels.t11, setLevel),
     }),
@@ -527,24 +551,50 @@ export const levels = {
             const add = (...args) => addObjectsOfType(level, ...args);
             const cc = chooseN(colors, 4);
             const c = pickRandom(cc);
+            const render = c => ({ d }) => <Square color={c} d={d}/>;
+            const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+            const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
             add(ObjType.target, {x: 5, y: 6});
             add(ObjType.lock, {x: 5, y: 4});
-            add({...ObjType.npc, wants: c}, {x: 1, y: 4});
+            add(npc(c), {x: 1, y: 4});
             add(ObjType.wall,
                 {x: 1, y: 0}, {x: 3, y: 0}, {x: 5, y: 0},
                 {x: 0, y: 4}, {x: 2, y: 4}, {x: 3, y: 4}, {x: 4, y: 4}, {x: 6, y: 4},
                 {x: 3, y: 5}, {x: 3, y: 6},
             );
             add(ObjType.key, {x: 1, y: 6});
-            add({...ObjType.figure, what: cc[0]}, {x: 0, y: 0});
-            add({...ObjType.figure, what: cc[1]}, {x: 2, y: 0});
-            add({...ObjType.figure, what: cc[2]}, {x: 4, y: 0});
-            add({...ObjType.figure, what: cc[3]}, {x: 6, y: 0});
+            add(figure(cc[0]), {x: 0, y: 0});
+            add(figure(cc[1]), {x: 2, y: 0});
+            add(figure(cc[2]), {x: 4, y: 0});
+            add(figure(cc[3]), {x: 6, y: 0});
         },
         nextLevel: winAndSetNextByTemplate(levels.t12, setLevel),
     }),
     t12: setLevel => ({
         ...baseLevel, _name: "t12", setLevel,
+        pos: {x: 5, y: 5},
+        onLoad: level => {
+            const add = (...args) => addObjectsOfType(level, ...args);
+            add(ObjType.target, {x: 0, y: 6});
+            add(ObjType.wall,
+                {x: 0, y: 4}, {x: 1, y: 4}, {x: 2, y: 4}, {x: 2, y: 6},
+            );
+            const aa = chooseN([0, 90, 180, 270], 3);
+            const c = pickRandom(colors);
+            const a = pickRandom(aa);
+            const pos = [{x:1, y:1}, {x:3, y:1}, {x:5, y:1}];
+            for (let i = 0; i < pos.length; i++) {
+                const shape = ({ d }) => <Triangle angle={aa[i]} color={c} d={d}/>;
+                add({...ObjType.figure, what: aa[i], shape}, pos[i]);
+                if (aa[i] === a) {
+                    add({...ObjType.npc, wants: a, shape}, {x:2, y:5});
+                }
+            }
+        },
+        nextLevel: winAndSetNextByTemplate(levels.t13, setLevel),
+    }),
+    t13: setLevel => ({
+        ...baseLevel, _name: "t13", setLevel,
         pos: {x: 3, y: 2},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 6}),
@@ -564,13 +614,14 @@ export const levels = {
                     {x: 6, y: 1}, {x: 6, y: 3}, {x: 6, y: 5},
                 ];
                 console.assert(colors.length === coords.length);
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+                const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
                 for (let i = 0; i < coords.length; i++) {
-                    level.objects.push({ ...coords[i],
-                        type: {...ObjType.figure, what: colors[i]}});
+                    level.objects.push({ ...coords[i], type: figure(colors[i])});
                 }
                 const c = pickRandom(colors);
-                level.objects.push({ x: 3, y: 4,
-                    type: {...ObjType.npc, wants: c}});
+                level.objects.push({ x: 3, y: 4, type: npc(c)});
             },
         ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
@@ -612,7 +663,7 @@ export const levels = {
                         [
                             levels.t1, levels.t2, levels.t3, levels.t4, levels.t5,
                             levels.t6, levels.t7, levels.t8, levels.t9, levels.t10,
-                            levels.t11, levels.t12,
+                            levels.t11, levels.t12, levels.t13,
                         ]}/>
                 </div>
             );
