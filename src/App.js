@@ -83,6 +83,17 @@ function cellPosToStyle(cell) {
     };
 }
 
+function rectToStyle(topLeft, bottomRight) {
+    const width = bottomRight.x - topLeft.x + bottomRight.width;
+    const height = bottomRight.y - topLeft.y + bottomRight.height;
+    return {
+        left: `${topLeft.x}px`,
+        top: `${topLeft.y}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+    };
+}
+
 function Player(props) {
     const ctx = React.useContext(Ctx);
     const ref = React.useRef();
@@ -115,6 +126,18 @@ function Player(props) {
                         it: ctx.pos.carry,
                     })}
                 </span>}
+        </div>
+    );
+}
+
+function Background({ topLeft, bottomRight, children }) {
+    const ctx = React.useContext(Ctx);
+    const a = calcCellPos(topLeft, ctx);
+    const b = calcCellPos(bottomRight, ctx);
+    const style = rectToStyle(a, b);
+    return (
+        <div style={style} className="background">
+            {children}
         </div>
     );
 }
@@ -170,7 +193,11 @@ function findCollisionInArray(pos, array, n) {
 }
 
 export function isCollision(a, b) {
-    return a.x === b.x && a.y === b.y;
+    const axx = a.hasOwnProperty('xx') ? a.xx : a.x;
+    const ayy = a.hasOwnProperty('yy') ? a.yy : a.y;
+    const bxx = b.hasOwnProperty('xx') ? b.xx : b.x;
+    const byy = b.hasOwnProperty('yy') ? b.yy : b.y;
+    return !(axx < b.x || bxx < a.x || ayy < b.y || byy < a.y);
 }
 
 function numberOfObjTypes(array, type) {
@@ -279,8 +306,6 @@ const ObjType = {
             const d = props.level.d * 2/3;
             const Shape = props.it.shape;
             return <Shape d={d}/>;
-            return <Shape color={props.it.what} d={d} angle={props.it.angle}
-                className={props.className || null}/>;
         },
         interact: carryItem,
     },
@@ -333,6 +358,16 @@ const ObjType = {
         },
     },
 };
+
+function addDuckPond(level, topLeft, bottomRight) {
+    level.backgrounds.push(() => (
+        <Background topLeft={topLeft} bottomRight={bottomRight}>
+            <div className="duckpond"/>
+        </Background>
+    ));
+    level.objects.push({type: {...ObjType.wall, className: ""},
+        x: topLeft.x, y: topLeft.y, xx: bottomRight.x, yy: bottomRight.y});
+}
 
 function $addObjectsOfType(type, ...args) {
     return level => {
@@ -392,10 +427,12 @@ const baseLevel = {
     width: 7, height: 7,
     score: 0,
     objects: [],
+    backgrounds: [],
     walk: pos => prev => ({...prev, ...sanitizePlayerPos(pos, prev)}),
     render: ({ level }) => {
         return (
             <Map onSetPlayerPos={level.walk}>
+                {level.backgrounds.map((bg, i) => bg())}
                 {level.objects.map((pos, i) => <Obj key={i} pos={pos}/>)}
                 <Player/>
                 {level.popover && level.popover()}
@@ -624,6 +661,32 @@ export const levels = {
                 level.objects.push({ x: 3, y: 4, type: npc(c)});
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels.t14, setLevel),
+    }),
+    t14: setLevel => ({
+        ...baseLevel, _name: "t14", setLevel,
+        pos: {x: 6, y: 1},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 3, y: 0}, {x: 5, y: 5}),
+            $addObjectsOfType(ObjType.key, {x: 1, y: 0}),
+            $addObjectsOfType(ObjType.lock, {x: 0, y: 4}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 3, y: 4}, {x: 2, y: 5}, {x: 3, y: 6},
+                {x: 5, y: 3},
+            ),
+            level => {
+                addDuckPond(level, {x:1, y:1}, {x:4, y:3});
+                const cc = chooseN(colors, 2);
+                const c = pickRandom(cc);
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+                const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+                add(figure(cc[0]), {x: 2, y: 4});
+                add(figure(cc[1]), {x: 2, y: 6});
+                add(npc(c), {x: 6, y: 3});
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
@@ -663,7 +726,7 @@ export const levels = {
                         [
                             levels.t1, levels.t2, levels.t3, levels.t4, levels.t5,
                             levels.t6, levels.t7, levels.t8, levels.t9, levels.t10,
-                            levels.t11, levels.t12, levels.t13,
+                            levels.t11, levels.t12, levels.t13, levels.t14,
                         ]}/>
                 </div>
             );
