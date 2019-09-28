@@ -39,6 +39,11 @@ function Map(props) {
         else if (e.key === "ArrowRight") moveRight();
         else if (e.key === "ArrowDown") moveDown();
         else if (e.key === "ArrowUp") moveUp();
+        else if (e.key === "Enter") {
+            if (ctx.pos.carry) {
+                ctx.setLevel(dropItem(ctx));
+            }
+        }
     };
     React.useEffect(() => {
         if (!ctx.popover) {
@@ -776,6 +781,33 @@ export const levels = {
                 add(npc(a), {x: 3, y: 5});
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels.t17, setLevel),
+    }),
+    t17: setLevel => ({
+        ...baseLevel, _name: "t17", setLevel,
+        pos: {x: 3, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target,
+                {x: 4, y: 0},
+                {x: 0, y: 2},
+                {x: 6, y: 4},
+                {x: 2, y: 6},
+            ),
+            level => {
+                addDuckPond(level, {x:0, y:0}, {x:3, y:1});
+                addDuckPond(level, {x:5, y:0}, {x:6, y:3});
+                addDuckPond(level, {x:0, y:3}, {x:1, y:6});
+                addDuckPond(level, {x:3, y:5}, {x:6, y:6});
+                const cc = chooseN(colors, 4);
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+                add(figure(cc[0]), {x: 4, y: 1});
+                add(figure(cc[1]), {x: 1, y: 2});
+                add(figure(cc[2]), {x: 5, y: 4});
+                add(figure(cc[3]), {x: 2, y: 5});
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
@@ -816,7 +848,7 @@ export const levels = {
                             levels.t1, levels.t2, levels.t3, levels.t4, levels.t5,
                             levels.t6, levels.t7, levels.t8, levels.t9, levels.t10,
                             levels.t11, levels.t12, levels.t13, levels.t14,
-                            levels.t15, levels.t16,
+                            levels.t15, levels.t16, levels.t17,
                         ]}/>
                 </div>
             );
