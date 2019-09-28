@@ -750,6 +750,32 @@ export const levels = {
                 add(npc(c), {x: 6, y: 4});
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels.t16, setLevel),
+    }),
+    t16: setLevel => ({
+        ...baseLevel, _name: "t16", setLevel,
+        pos: {x: 3, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 3, y: 6}),
+            level => {
+                addDuckPond(level, {x:0, y:0}, {x:1, y:2});
+                addDuckPond(level, {x:5, y:0}, {x:6, y:2});
+                addDuckPond(level, {x:0, y:5}, {x:2, y:6});
+                addDuckPond(level, {x:4, y:5}, {x:6, y:6});
+                const aa = chooseN([0, 90, 180, 270], 4);
+                const a = pickRandom(aa);
+                const c = pickRandom(colors);
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const render = a => ({ d }) => <Triangle angle={a} color={c} d={d}/>;
+                const figure = a => ({...ObjType.figure, what: a, shape: render(a)});
+                const npc = a => ({...ObjType.npc, wants: a, shape: render(a)});
+                add(figure(aa[0]), {x: 0, y: 4});
+                add(figure(aa[1]), {x: 6, y: 4});
+                add(figure(aa[2]), {x: 2, y: 0});
+                add(figure(aa[3]), {x: 4, y: 0});
+                add(npc(a), {x: 3, y: 5});
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
@@ -790,7 +816,7 @@ export const levels = {
                             levels.t1, levels.t2, levels.t3, levels.t4, levels.t5,
                             levels.t6, levels.t7, levels.t8, levels.t9, levels.t10,
                             levels.t11, levels.t12, levels.t13, levels.t14,
-                            levels.t15,
+                            levels.t15, levels.t16,
                         ]}/>
                 </div>
             );

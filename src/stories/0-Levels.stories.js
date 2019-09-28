@@ -23,6 +23,7 @@ export const level12 = () => <Walkie startLevel={levels.t12}/>;
 export const level13 = () => <Walkie startLevel={levels.t13}/>;
 export const level14 = () => <Walkie startLevel={levels.t14}/>;
 export const level15 = () => <Walkie startLevel={levels.t15}/>;
+export const level16 = () => <Walkie startLevel={levels.t16}/>;
 
 function ColorList({ colors }) {
     return (
