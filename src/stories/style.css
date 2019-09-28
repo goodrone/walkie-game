@@ -1,0 +1,10 @@
+.color-list {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+}
+.color-list > div {
+    width: 20px;
+    height: 20px;
+    margin: 2px;
+}
