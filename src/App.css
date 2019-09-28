@@ -103,6 +103,7 @@ footer.hidden {
 
 .popover {
     position: absolute;
+    top: 0;
     width: 100%;
     height: 100%;
     background: #111;
@@ -172,6 +173,13 @@ footer.hidden {
     height: 100%;
     background: #1b61b6;
     border-radius: 20px;
+    position: relative;
+    border: 5px solid sandybrown;
+    box-sizing: border-box;
+}
+.duckpond .duck {
+    position: absolute;
+    font-size: 22px;
 }
 .player, .target, .wall, .lock, .figure, .npc {
     display: flex;

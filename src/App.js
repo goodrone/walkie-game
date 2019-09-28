@@ -359,10 +359,43 @@ const ObjType = {
     },
 };
 
+function DuckPond() {
+    const pond = React.useRef();
+    const duck = React.useRef();
+    const moveDuck = () => {
+        const pondRect = pond.current.getBoundingClientRect();
+        const duckRect = duck.current.getBoundingClientRect();
+        const x = Math.floor(Math.random() * (pondRect.width - duckRect.width));
+        const y = Math.floor(Math.random() * (pondRect.height - duckRect.height));
+        duck.current.style.left = `${x}px`;
+        duck.current.style.top = `${y}px`;
+        const mirror = Math.random() < 0.5 ? -1 : 1;
+        duck.current.style.transform = `scaleX(${mirror})`;
+    };
+    React.useLayoutEffect(moveDuck, []);
+    React.useEffect(() => {
+        let t;
+        const delayMoveDuck = () => {
+            t = setTimeout(() => {
+                moveDuck();
+                delayMoveDuck();
+            }, 2000 + Math.random() * 8000);
+        };
+        delayMoveDuck();
+        return () => clearTimeout(t);
+    }, []);
+    return (
+        <div className="duckpond" ref={pond}>
+            {/* eslint-disable-next-line */}
+            <div className="duck" ref={duck}>&#x1f986;</div>
+        </div>
+    );
+}
+
 function addDuckPond(level, topLeft, bottomRight) {
     level.backgrounds.push(() => (
         <Background topLeft={topLeft} bottomRight={bottomRight}>
-            <div className="duckpond"/>
+            <DuckPond/>
         </Background>
     ));
     level.objects.push({type: {...ObjType.wall, className: ""},
