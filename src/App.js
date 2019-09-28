@@ -795,6 +795,7 @@ function ChooseLevels({ onChoose, levels }) {
 function startLevel(level) {
     const result = Object.assign(level);
     level.objects.length = 0;
+    level.backgrounds.length = 0;
     if (Array.isArray(level.onLoad)) {
         level.onLoad.map(f => f(result));
     } else if (typeof level.onLoad === "function") {
