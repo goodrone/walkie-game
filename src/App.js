@@ -105,16 +105,32 @@ function Player(props) {
     const cell = calcCellPos(ctx.pos, ctx);
     const style = cellPosToStyle(cell);
     const addCallbacks = () => {
-        const animateClasses = ["animate-eat", "animate-shake", "animate-drop"];
+        const animateClasses = ["animate-eat", "animate-shake", "animate-drop",
+            "animate-teleport"];
         const addAnimateFunc = className => () => {
             const elem = ref.current;
             elem.classList.remove(...animateClasses);
             void elem.offsetWidth;
             elem.classList.add(className);
         };
+        ctx.pos.stopAnimations = () => {
+            ref.current.classList.remove(...animateClasses);
+        };
         ctx.pos.animateEat = addAnimateFunc("animate-eat");
         ctx.pos.animateShake = addAnimateFunc("animate-shake");
         ctx.pos.animateDrop = addAnimateFunc("animate-drop");
+        ctx.pos.animateTeleport = (cur, in_, out, end) => {
+            const elem = ref.current;
+            elem.style.setProperty("--cur-x", cur.x + "px");
+            elem.style.setProperty("--cur-y", cur.y + "px");
+            elem.style.setProperty("--in-x", in_.x + "px");
+            elem.style.setProperty("--in-y", in_.y + "px");
+            elem.style.setProperty("--out-x", out.x + "px");
+            elem.style.setProperty("--out-y", out.y + "px");
+            elem.style.setProperty("--end-x", end.x + "px");
+            elem.style.setProperty("--end-y", end.y + "px");
+            addAnimateFunc("animate-teleport")();
+        };
     }; // Prevent exhaustive-deps eslint rule from firing
     React.useEffect(addCallbacks, []);
     return (
@@ -314,6 +330,20 @@ const ObjType = {
         },
         interact: carryItem,
     },
+    door: {
+        className: "door",
+        render: () => <>&#x1f6aa;</>,
+        interact: (level, next, index) => {
+            const o = level.objects[index];
+            next.pos = {...next.pos, x: o.type.exit.x, y: o.type.exit.y};
+            const curRect = calcCellPos(level.pos, level);
+            const inRect = calcCellPos(o, level);
+            const outRect = calcCellPos(o.type.out, level);
+            const endRect = calcCellPos(o.type.exit, level);
+            level.pos.animateTeleport(curRect, inRect, outRect, endRect);
+            return next;
+        },
+    },
     npc: {
         className: "npc",
         render: () => <>&#x1f468;&#x1f3fb;</>,
@@ -326,7 +356,7 @@ const ObjType = {
                 return next;
             }
             if (level.pos.carry) {
-                console.log("npc.interact", level.pos.carry.what, o.type.wants);
+                console.info("npc.interact", level.pos.carry.what, o.type.wants);
             }
             level.popover = function Popover() {
                 const [ready, setReady] = React.useState();
@@ -407,6 +437,10 @@ function addDuckPond(level, topLeft, bottomRight) {
         x: topLeft.x, y: topLeft.y, xx: bottomRight.x, yy: bottomRight.y});
 }
 
+function addDoor(level, pos, out, exit) {
+    addObjectsOfType(level, {...ObjType.door, out, exit}, pos);
+}
+
 function $addObjectsOfType(type, ...args) {
     return level => {
         addObjectsOfType(level, type, ...args);
@@ -466,7 +500,10 @@ const baseLevel = {
     score: 0,
     objects: [],
     backgrounds: [],
-    walk: pos => prev => ({...prev, ...sanitizePlayerPos(pos, prev)}),
+    walk: pos => prev => {
+        prev.pos.stopAnimations();
+        return {...prev, ...sanitizePlayerPos(pos, prev)}
+    },
     render: ({ level }) => {
         return (
             <Map onSetPlayerPos={level.walk}>
@@ -852,6 +889,31 @@ export const levels = {
                 add(npc(cc[2]), {x: 5, y: 4});
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels.t20, setLevel),
+    }),
+    t20: setLevel => ({
+        ...baseLevel, _name: "t20", setLevel,
+        pos: {x: 5, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 1, y: 3}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 3, y: 0}, {x: 3, y: 2}, {x: 3, y: 4}, {x: 3, y: 6},
+            ),
+            level => {
+                addDoor(level, {x: 5, y: 6}, {x: 1, y: 0}, {x: 1, y: 1});
+                addDoor(level, {x: 1, y: 0}, {x: 5, y: 6}, {x: 5, y: 5});
+                const cc = chooseN(colors, 3);
+                const c = pickRandom(cc);
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+                const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+                add(figure(c), {x: 1, y: 5});
+                add(npc(cc[0]), {x: 3, y: 1});
+                add(npc(cc[1]), {x: 3, y: 3});
+                add(npc(cc[2]), {x: 3, y: 5});
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
@@ -893,7 +955,7 @@ export const levels = {
                             levels.t6, levels.t7, levels.t8, levels.t9, levels.t10,
                             levels.t11, levels.t12, levels.t13, levels.t14,
                             levels.t15, levels.t16, levels.t17, levels.t18,
-                            levels.t19,
+                            levels.t19, levels.t20,
                         ]}/>
                 </div>
             );

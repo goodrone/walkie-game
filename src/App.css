@@ -181,7 +181,7 @@ footer.hidden {
     position: absolute;
     font-size: 22px;
 }
-.player, .target, .wall, .lock, .figure, .npc {
+.player, .target, .wall, .lock, .figure, .door, .npc {
     display: flex;
     x-flex-direction: column;
     justify-content: center;
@@ -222,6 +222,18 @@ footer.hidden {
     0% {transform: scale(1);}
     50% {transform: scale(0.7);}
     100% {transform: scale(1);}
+}
+.player.animate-teleport {
+    animation: teleport-in 0.1s, teleport-out 0.1s;
+    animation-delay: 0s, 0.1s;
+}
+@keyframes teleport-in {
+    from {left: var(--cur-x); top: var(--cur-y); transform: scale(1);}
+    to {left: var(--in-x); top: var(--in-y); transform: scale(0);}
+}
+@keyframes teleport-out {
+    from {left: var(--out-x); top: var(--out-y); transform: scale(0);}
+    to {left: var(--end-x); top: var(--end-y); transform: scale(1);}
 }
 .player .carry {
     position: absolute;
