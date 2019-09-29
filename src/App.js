@@ -448,7 +448,7 @@ function pickRandom(array) {
 export const colors = [
     // darker colors
     "rgb(169,0,0)",
-    "rgb(77,71,0)",
+    "rgb(123,114,3)",
     "rgb(0,106,46)",
     "rgb(0,82,158)",
     "rgb(129,0,130)",
