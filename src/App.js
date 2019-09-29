@@ -735,10 +735,7 @@ export const levels = {
             $addObjectsOfType(ObjType.target, {x: 0, y: 7}),
             $addObjectsOfType(ObjType.key, {x: 6, y: 7}),
             $addObjectsOfType(ObjType.lock, {x: 0, y: 4}, {x: 1, y: 4}),
-            $addObjectsOfType(ObjType.wall,
-                {x: 3, y: 5},
-                {x: 5, y: 4},
-            ),
+            $addObjectsOfType(ObjType.wall, {x: 3, y: 5}, {x: 5, y: 4}),
             level => {
                 addDuckPond(level, {x:2, y:0}, {x:4, y:1});
                 addDuckPond(level, {x:2, y:3}, {x:4, y:4});
@@ -830,6 +827,31 @@ export const levels = {
                 add(npc(cc[i]), {x: 3, y: 5});
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels.t19, setLevel),
+    }),
+    t19: setLevel => ({
+        ...baseLevel, _name: "t19", setLevel,
+        pos: {x: 3, y: 2},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 3, y: 6}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 0, y: 4}, {x: 2, y: 4}, {x: 4, y: 4}, {x: 6, y: 4},
+            ),
+            level => {
+                addDuckPond(level, {x:0, y:0}, {x:1, y:1});
+                addDuckPond(level, {x:5, y:0}, {x:6, y:1});
+                const cc = chooseN(colors, 3);
+                const c = pickRandom(cc);
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+                const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+                add(figure(c), {x: 3, y: 0});
+                add(npc(cc[0]), {x: 1, y: 4});
+                add(npc(cc[1]), {x: 3, y: 4});
+                add(npc(cc[2]), {x: 5, y: 4});
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
@@ -871,6 +893,7 @@ export const levels = {
                             levels.t6, levels.t7, levels.t8, levels.t9, levels.t10,
                             levels.t11, levels.t12, levels.t13, levels.t14,
                             levels.t15, levels.t16, levels.t17, levels.t18,
+                            levels.t19,
                         ]}/>
                 </div>
             );
