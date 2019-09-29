@@ -914,6 +914,24 @@ export const levels = {
                 add(npc(cc[2]), {x: 3, y: 5});
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels.t21, setLevel),
+    }),
+    t21: setLevel => ({
+        ...baseLevel, _name: "t21", setLevel,
+        pos: {x: 0, y: 6},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 6, y: 6}, {x: 0, y: 0}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 1, y: 3}, {x: 3, y: 1}, {x: 3, y: 5}, {x: 5, y: 3},
+            ),
+            level => {
+                addDuckPond(level, {x:2, y:2}, {x:4, y:4});
+                addDoor(level, {x: 0, y: 3}, {x: 3, y: 6}, {x: 4, y: 6});
+                addDoor(level, {x: 3, y: 6}, {x: 0, y: 3}, {x: 0, y: 4});
+                addDoor(level, {x: 6, y: 3}, {x: 3, y: 0}, {x: 4, y: 0});
+                addDoor(level, {x: 3, y: 0}, {x: 0, y: 3}, {x: 0, y: 2});
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
@@ -955,7 +973,7 @@ export const levels = {
                             levels.t6, levels.t7, levels.t8, levels.t9, levels.t10,
                             levels.t11, levels.t12, levels.t13, levels.t14,
                             levels.t15, levels.t16, levels.t17, levels.t18,
-                            levels.t19, levels.t20,
+                            levels.t19, levels.t20, levels.t21,
                         ]}/>
                 </div>
             );
