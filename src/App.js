@@ -932,6 +932,37 @@ export const levels = {
                 addDoor(level, {x: 3, y: 0}, {x: 0, y: 3}, {x: 0, y: 2});
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels.t22, setLevel),
+    }),
+    t22: setLevel => ({
+        ...baseLevel, _name: "t22", setLevel,
+        height: 8,
+        pos: {x: 3, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 0, y: 0}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 1, y: 0}, {x: 3, y: 0}, {x: 3, y: 7},
+            ),
+            $addObjectsOfType(ObjType.key,
+                {x: 2, y: 0}, {x: 6, y: 4}, {x: 0, y: 6},
+            ),
+            $addObjectsOfType(ObjType.lock, {x: 3, y: 1}, {x: 3, y: 6}),
+            level => {
+                addDuckPond(level, {x:0, y:2}, {x:6, y:2});
+                addDuckPond(level, {x:0, y:5}, {x:6, y:5});
+                addDoor(level, {x: 0, y: 3}, {x: 6, y: 0}, {x: 5, y: 0});
+                addDoor(level, {x: 6, y: 0}, {x: 0, y: 3}, {x: 1, y: 3});
+                addDoor(level, {x: 0, y: 4}, {x: 6, y: 7}, {x: 5, y: 7});
+                addDoor(level, {x: 6, y: 7}, {x: 0, y: 4}, {x: 1, y: 4});
+                const c = pickRandom(colors);
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+                const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+                add(figure(c), {x: 0, y: 7});
+                add(npc(c), {x: 1, y: 1});
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
@@ -973,7 +1004,7 @@ export const levels = {
                             levels.t6, levels.t7, levels.t8, levels.t9, levels.t10,
                             levels.t11, levels.t12, levels.t13, levels.t14,
                             levels.t15, levels.t16, levels.t17, levels.t18,
-                            levels.t19, levels.t20, levels.t21,
+                            levels.t19, levels.t20, levels.t21, levels.t22,
                         ]}/>
                 </div>
             );
