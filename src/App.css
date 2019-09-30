@@ -31,7 +31,11 @@ footer.hidden {
 
 .walkie {
     margin: auto;
+    height: 100%;
     user-select: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
 }
 .map:focus {
     outline: none;
