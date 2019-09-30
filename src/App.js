@@ -1,4 +1,5 @@
 import React from 'react';
+import { HashRouter, withRouter } from "react-router-dom";
 import './App.css';
 
 function Map(props) {
@@ -1057,7 +1058,6 @@ export const levels = {
         },
     }),
 };
-const firstLevel = levels[1];
 
 function computeLevelStyle(level) {
     const width = level.width * level.d;
@@ -1103,6 +1103,9 @@ function startLevel(level) {
         level.pos.carry = null;
     }
     console.log("startLevel", result);
+    if (!isNaN(level.name)) {
+        window.location.hash = "#" + level.name;
+    }
     return result;
 }
 
@@ -1117,14 +1120,23 @@ function restartLevel(level) {
     throw new RangeError(`Level not found: ${keyName}`);
 }
 
-export function Walkie(props) {
+function getLevelNameFromRouter(location) {
+    const s = location.pathname.substr(1);
+    if (isNaN(s) || !(s in levels)) {
+        return null;
+    }
+    return s;
+}
+
+function WalkieComponent(props) {
     const [level, _setLevel] = React.useState(null);
     const setLevel = (...args) => {
         _setLevel(...args);
 
     };
     const onStart = () => {
-        setLevel(startLevel((props.startLevel || firstLevel)(setLevel)));
+        const name = getLevelNameFromRouter(props.location) || "1";
+        setLevel(startLevel(levels[name](setLevel)));
     }; // Prevent exhaustive-deps eslint rule from firing
     React.useEffect(onStart, []);
     if (level === null) {
@@ -1139,6 +1151,8 @@ export function Walkie(props) {
         </div>
     );
 }
+
+export const Walkie = withRouter(WalkieComponent);
 
 function Footer() {
     const [show, setShow] = React.useState(true);
@@ -1157,10 +1171,12 @@ function Footer() {
 function App() {
     return (
         <>
-            <div className="app">
-                <Walkie/>
-            </div>
-            <Footer/>
+            <HashRouter hashType="noslash">
+                <div className="app">
+                    <Walkie/>
+                </div>
+                <Footer/>
+            </HashRouter>
         </>
     );
 }
