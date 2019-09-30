@@ -522,7 +522,7 @@ function MapControls() {
     return (
         <div className="controls">
             <button onClick={choose}><Burger/></button>
-            {level._name}
+            {level.name}
             <button onClick={restart}>&#8635;</button>
         </div>
     );
@@ -538,7 +538,6 @@ function getNextCounter() {
 }
 
 const baseLevel = {
-    _name: "base",
     d: 45,
     width: 7, height: 7,
     score: 0,
@@ -552,7 +551,7 @@ const baseLevel = {
         return (
             <>
                 <Map key={level._counter} onSetPlayerPos={level.walk}>
-                    {level.backgrounds.map((bg, i) => bg())}
+                    {level.backgrounds.map((Bg, i) => <Bg key={i}/>)}
                     {level.objects.map((pos, i) => <Obj key={i} pos={pos}/>)}
                     <Player/>
                     {level.popover && level.popover()}
@@ -569,16 +568,16 @@ function winAndSetNextByTemplate(template, setLevel) {
     }
 }
 export const levels = {
-    t1: setLevel => ({
-        ...baseLevel, _name: "1", setLevel,
+    "1": setLevel => ({
+        ...baseLevel, name: "1", setLevel,
         pos: {x: 2, y: 3, carry: ObjType.key},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 4, y: 3}),
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t2, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["2"], setLevel),
     }),
-    t2: setLevel => ({
-        ...baseLevel, _name: "2", setLevel,
+    "2": setLevel => ({
+        ...baseLevel, name: "2", setLevel,
         pos: {x: 1, y: 1},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 5, y: 5}),
@@ -586,29 +585,29 @@ export const levels = {
                 {x: 4, y: 1}, {x: 5, y: 1}, {x: 5, y: 2},
                 {x: 1, y: 4}, {x: 1, y: 5}, {x: 2, y: 5}),
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t3, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["3"], setLevel),
     }),
-    t3: setLevel => ({
-        ...baseLevel, _name: "3", setLevel,
+    "3": setLevel => ({
+        ...baseLevel, name: "3", setLevel,
         pos: {x: 1, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 5, y: 3}),
             $addObjectsOfType(ObjType.wall, {x: 3, y: 2}, {x: 3, y: 3}, {x: 3, y: 4}),
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t4, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["4"], setLevel),
     }),
-    t4: setLevel => ({
-        ...baseLevel, _name: "4", setLevel,
+    "4": setLevel => ({
+        ...baseLevel, name: "4", setLevel,
         pos: {x: 2, y: 1},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 2, y: 5}),
             $addObjectsOfType(ObjType.wall,
                 {x: 0, y: 3}, {x: 1, y: 3}, {x: 2, y: 3}, {x: 3, y: 3}, {x: 4, y: 3}),
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t5, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["5"], setLevel),
     }),
-    t5: setLevel => ({
-        ...baseLevel, _name: "5", setLevel,
+    "5": setLevel => ({
+        ...baseLevel, name: "5", setLevel,
         pos: {x: 3, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target,
@@ -617,10 +616,10 @@ export const levels = {
                 {x: 1, y: 3}, {x: 3, y: 1}, {x: 5, y: 3}, {x: 3, y: 5},
                 {x: 0, y: 3}, {x: 3, y: 0}, {x: 6, y: 3}, {x: 3, y: 6}),
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t6, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["6"], setLevel),
     }),
-    t6: setLevel => ({
-        ...baseLevel, _name: "6", setLevel,
+    "6": setLevel => ({
+        ...baseLevel, name: "6", setLevel,
         pos: {x: 1, y: 1},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 5, y: 1}),
@@ -630,10 +629,10 @@ export const levels = {
                 {x: 5, y: 3}, {x: 5, y: 4}, {x: 5, y: 5},
                 {x: 2, y: 5}, {x: 3, y: 5}, {x: 4, y: 5}),
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t7, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["7"], setLevel),
     }),
-    t7: setLevel => ({
-        ...baseLevel, _name: "7", setLevel,
+    "7": setLevel => ({
+        ...baseLevel, name: "7", setLevel,
         pos: {x: 1, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 5, y: 1}),
@@ -643,10 +642,10 @@ export const levels = {
                 {x: 3, y: 0}, {x: 3, y: 1}, {x: 3, y: 3}, {x: 4, y: 3},
                 {x: 5, y: 3}, {x: 6, y: 3}),
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t8, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["8"], setLevel),
     }),
-    t8: setLevel => ({
-        ...baseLevel, _name: "9", setLevel,
+    "8": setLevel => ({
+        ...baseLevel, name: "8", setLevel,
         pos: {x: 3, y: 1},
         onLoad: level => {
             const add = (...args) => addObjectsOfType(level, ...args);
@@ -662,10 +661,10 @@ export const levels = {
                 {x: 0, y: 3}, {x: 1, y: 3}, {x: 2, y: 3},
                 {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3});
         },
-        nextLevel: winAndSetNextByTemplate(levels.t9, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["9"], setLevel),
     }),
-    t9: setLevel => ({
-        ...baseLevel, _name: "10", setLevel,
+    "9": setLevel => ({
+        ...baseLevel, name: "9", setLevel,
         pos: {x: 1, y: 1},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 5, y: 1}),
@@ -675,10 +674,10 @@ export const levels = {
                 {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}),
             $addObjectsOfType(ObjType.wall, {x: 3, y: 3}),
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t10, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["10"], setLevel),
     }),
-    t10: setLevel => ({
-        ...baseLevel, _name: "10", setLevel,
+    "10": setLevel => ({
+        ...baseLevel, name: "10", setLevel,
         pos: {x: 2, y: 3},
         onLoad: level => {
             const add = (...args) => addObjectsOfType(level, ...args);
@@ -701,10 +700,10 @@ export const levels = {
             add(figure(cc[0]), {x: 0, y: 3});
             add(figure(cc[1]), {x: 0, y: 5});
         },
-        nextLevel: winAndSetNextByTemplate(levels.t11, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["11"], setLevel),
     }),
-    t11: setLevel => ({
-        ...baseLevel, _name: "11", setLevel,
+    "11": setLevel => ({
+        ...baseLevel, name: "11", setLevel,
         pos: {x: 1, y: 2},
         onLoad: level => {
             const add = (...args) => addObjectsOfType(level, ...args);
@@ -727,10 +726,10 @@ export const levels = {
             add(figure(cc[2]), {x: 4, y: 0});
             add(figure(cc[3]), {x: 6, y: 0});
         },
-        nextLevel: winAndSetNextByTemplate(levels.t12, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["12"], setLevel),
     }),
-    t12: setLevel => ({
-        ...baseLevel, _name: "12", setLevel,
+    "12": setLevel => ({
+        ...baseLevel, name: "12", setLevel,
         pos: {x: 5, y: 5},
         onLoad: level => {
             const add = (...args) => addObjectsOfType(level, ...args);
@@ -750,10 +749,10 @@ export const levels = {
                 }
             }
         },
-        nextLevel: winAndSetNextByTemplate(levels.t13, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["13"], setLevel),
     }),
-    t13: setLevel => ({
-        ...baseLevel, _name: "13", setLevel,
+    "13": setLevel => ({
+        ...baseLevel, name: "13", setLevel,
         pos: {x: 3, y: 2},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 6}),
@@ -783,10 +782,10 @@ export const levels = {
                 level.objects.push({ x: 3, y: 4, type: npc(c)});
             },
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t14, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["14"], setLevel),
     }),
-    t14: setLevel => ({
-        ...baseLevel, _name: "14", setLevel,
+    "14": setLevel => ({
+        ...baseLevel, name: "14", setLevel,
         pos: {x: 6, y: 1},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 0}, {x: 5, y: 5}),
@@ -809,10 +808,10 @@ export const levels = {
                 add(npc(c), {x: 6, y: 3});
             },
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t15, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["15"], setLevel),
     }),
-    t15: setLevel => ({
-        ...baseLevel, _name: "15", setLevel,
+    "15": setLevel => ({
+        ...baseLevel, name: "15", setLevel,
         height: 8,
         pos: {x: 3, y: 2},
         onLoad: [
@@ -836,10 +835,10 @@ export const levels = {
                 add(npc(c), {x: 6, y: 4});
             },
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t16, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["16"], setLevel),
     }),
-    t16: setLevel => ({
-        ...baseLevel, _name: "16", setLevel,
+    "16": setLevel => ({
+        ...baseLevel, name: "16", setLevel,
         pos: {x: 3, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 6}),
@@ -862,10 +861,10 @@ export const levels = {
                 add(npc(a), {x: 3, y: 5});
             },
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t17, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["17"], setLevel),
     }),
-    t17: setLevel => ({
-        ...baseLevel, _name: "17", setLevel,
+    "17": setLevel => ({
+        ...baseLevel, name: "17", setLevel,
         pos: {x: 3, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target,
@@ -886,10 +885,10 @@ export const levels = {
                 add(figure(cc[3]), {x: 2, y: 5});
             },
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t18, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["18"], setLevel),
     }),
-    t18: setLevel => ({
-        ...baseLevel, _name: "18", setLevel,
+    "18": setLevel => ({
+        ...baseLevel, name: "18", setLevel,
         pos: {x: 3, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 0}),
@@ -911,10 +910,10 @@ export const levels = {
                 add(npc(cc[i]), {x: 3, y: 5});
             },
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t19, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["19"], setLevel),
     }),
-    t19: setLevel => ({
-        ...baseLevel, _name: "19", setLevel,
+    "19": setLevel => ({
+        ...baseLevel, name: "19", setLevel,
         pos: {x: 3, y: 2},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 6}),
@@ -936,10 +935,10 @@ export const levels = {
                 add(npc(cc[2]), {x: 5, y: 4});
             },
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t20, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["20"], setLevel),
     }),
-    t20: setLevel => ({
-        ...baseLevel, _name: "20", setLevel,
+    "20": setLevel => ({
+        ...baseLevel, name: "20", setLevel,
         pos: {x: 5, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 1, y: 3}),
@@ -961,10 +960,10 @@ export const levels = {
                 add(npc(cc[2]), {x: 3, y: 5});
             },
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t21, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["21"], setLevel),
     }),
-    t21: setLevel => ({
-        ...baseLevel, _name: "21", setLevel,
+    "21": setLevel => ({
+        ...baseLevel, name: "21", setLevel,
         pos: {x: 0, y: 6},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 6, y: 6}, {x: 0, y: 0}),
@@ -979,10 +978,10 @@ export const levels = {
                 addDoor(level, {x: 3, y: 0}, {x: 0, y: 3}, {x: 0, y: 2});
             },
         ],
-        nextLevel: winAndSetNextByTemplate(levels.t22, setLevel),
+        nextLevel: winAndSetNextByTemplate(levels["22"], setLevel),
     }),
-    t22: setLevel => ({
-        ...baseLevel, _name: "22", setLevel,
+    "22": setLevel => ({
+        ...baseLevel, name: "22", setLevel,
         height: 8,
         pos: {x: 3, y: 3},
         onLoad: [
@@ -1013,7 +1012,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
-        ...baseLevel, _name: "win", setLevel,
+        ...baseLevel, setLevel,
         render: function Win({ level }) {
             const [state, setState] = React.useState({});
             const ref = React.useRef();
@@ -1040,12 +1039,12 @@ export const levels = {
         },
     }),
     chooseLevel: setLevel => ({
-        ...baseLevel, _name: "choose", setLevel,
+        ...baseLevel, setLevel,
         render: ({ level }) => {
-            const onChoose = level => setLevel(startLevel(level(setLevel)));
+            const onChoose = level => setLevel(startLevel(levels[level](setLevel)));
             return (
                 <div className="choose-level" style={computeLevelStyle(level)}>
-                    <ChooseLevels onChoose={onChoose} levels={
+                    <ChooseLevels onChoose={onChoose} levels={Object.keys(levels)} levels_XXX={
                         [
                             levels.t1, levels.t2, levels.t3, levels.t4, levels.t5,
                             levels.t6, levels.t7, levels.t8, levels.t9, levels.t10,
@@ -1058,7 +1057,7 @@ export const levels = {
         },
     }),
 };
-const firstLevel = levels.t1;
+const firstLevel = levels[1];
 
 function computeLevelStyle(level) {
     const width = level.width * level.d;
@@ -1074,9 +1073,12 @@ function ChooseLevels({ onChoose, levels }) {
     return (
         <div className="level-list">
             {levels.map((level, i) => {
+                if (isNaN(level)) {
+                    return null;
+                }
                 return (
-                    <button key={i} onClick={() => onChoose(level)}>
-                        {i + 1}
+                    <button key={level} onClick={() => onChoose(level)}>
+                        {level}
                     </button>
                 );
             })}
@@ -1105,7 +1107,7 @@ function startLevel(level) {
 }
 
 function restartLevel(level) {
-    const keyName = "t" + level._name;
+    const keyName = level.name;
     for (const name in levels) {
         if (name === keyName) {
             level.setLevel(startLevel(levels[name](level.setLevel)));
