@@ -2,27 +2,34 @@ import React from 'react';
 import './App.css';
 
 function Map(props) {
-    const ctx = React.useContext(Ctx);
+    const level = React.useContext(Level);
     const ref = React.useRef();
     const style = {
         position: "relative",
         background: "#333",
-        width: `${ctx.width * ctx.d}px`,
-        height: `${ctx.height * ctx.d}px`,
+        width: `${level.width * level.d}px`,
+        height: `${level.height * level.d}px`,
     };
-    const moveUp = () => ctx.setLevel(props.onSetPlayerPos({x: ctx.pos.x, y: ctx.pos.y - 1}));
-    const moveDown = () => ctx.setLevel(props.onSetPlayerPos({x: ctx.pos.x, y: ctx.pos.y + 1}));
-    const moveLeft = () => ctx.setLevel(props.onSetPlayerPos({x: ctx.pos.x - 1, y: ctx.pos.y}));
-    const moveRight = () => ctx.setLevel(props.onSetPlayerPos({x: ctx.pos.x + 1, y: ctx.pos.y}));
+    const move = (dx, dy) => {
+        const next = props.onSetPlayerPos({
+            x: level.pos.x + dx,
+            y: level.pos.y + dy,
+        });
+        level.setLevel(next);
+    };
+    const moveUp = () => move(0, -1);
+    const moveDown = () => move(0, 1);
+    const moveLeft = () => move(-1, 0);
+    const moveRight = () => move(1, 0);
     const handler = e => {
         const rect = ref.current.getBoundingClientRect();
-        const playerRect = calcCellPos(ctx.pos, ctx);
+        const playerRect = calcCellPos(level.pos, level);
         const p = e.touches[0];
         const rx = p.clientX - (rect.left + playerRect.x) - playerRect.width / 2;
         const ry = p.clientY - (rect.top + playerRect.y) - playerRect.height / 2;
         if (Math.abs(rx) < playerRect.width / 2 && Math.abs(ry) < playerRect.height / 2) {
-            if (ctx.pos.carry) {
-                ctx.setLevel(dropItem(ctx));
+            if (level.pos.carry) {
+                level.setLevel(dropItem(level));
             }
             return;
         }
@@ -40,13 +47,13 @@ function Map(props) {
         else if (e.key === "ArrowDown") moveDown();
         else if (e.key === "ArrowUp") moveUp();
         else if (e.key === "Enter") {
-            if (ctx.pos.carry) {
-                ctx.setLevel(dropItem(ctx));
+            if (level.pos.carry) {
+                level.setLevel(dropItem(level));
             }
         }
     };
     React.useEffect(() => {
-        if (!ctx.popover) {
+        if (!level.popover) {
             ref.current.focus();
         }
     });
@@ -100,9 +107,9 @@ function rectToStyle(topLeft, bottomRight) {
 }
 
 function Player(props) {
-    const ctx = React.useContext(Ctx);
+    const level = React.useContext(Level);
     const ref = React.useRef();
-    const cell = calcCellPos(ctx.pos, ctx);
+    const cell = calcCellPos(level.pos, level);
     const style = cellPosToStyle(cell);
     const addCallbacks = () => {
         const animateClasses = ["animate-eat", "animate-shake", "animate-drop",
@@ -113,13 +120,13 @@ function Player(props) {
             void elem.offsetWidth;
             elem.classList.add(className);
         };
-        ctx.pos.stopAnimations = () => {
+        level.pos.stopAnimations = () => {
             ref.current.classList.remove(...animateClasses);
         };
-        ctx.pos.animateEat = addAnimateFunc("animate-eat");
-        ctx.pos.animateShake = addAnimateFunc("animate-shake");
-        ctx.pos.animateDrop = addAnimateFunc("animate-drop");
-        ctx.pos.animateTeleport = (cur, in_, out, end) => {
+        level.pos.animateEat = addAnimateFunc("animate-eat");
+        level.pos.animateShake = addAnimateFunc("animate-shake");
+        level.pos.animateDrop = addAnimateFunc("animate-drop");
+        level.pos.animateTeleport = (cur, in_, out, end) => {
             const elem = ref.current;
             elem.style.setProperty("--cur-x", cur.x + "px");
             elem.style.setProperty("--cur-y", cur.y + "px");
@@ -139,12 +146,12 @@ function Player(props) {
             {/* eslint-disable */}
             &#x1f642;
             {/* eslint-enable */}
-            {ctx.pos.carry &&
+            {level.pos.carry &&
                 <span className="carry">
-                    {ctx.pos.carry.render({
-                        level: ctx,
-                        className: ctx.pos.carry.className,
-                        it: ctx.pos.carry,
+                    {level.pos.carry.render({
+                        level,
+                        className: level.pos.carry.className,
+                        it: level.pos.carry,
                     })}
                 </span>}
         </div>
@@ -152,9 +159,9 @@ function Player(props) {
 }
 
 function Background({ topLeft, bottomRight, children }) {
-    const ctx = React.useContext(Ctx);
-    const a = calcCellPos(topLeft, ctx);
-    const b = calcCellPos(bottomRight, ctx);
+    const level = React.useContext(Level);
+    const a = calcCellPos(topLeft, level);
+    const b = calcCellPos(bottomRight, level);
     const style = rectToStyle(a, b);
     return (
         <div style={style} className="background">
@@ -164,18 +171,18 @@ function Background({ topLeft, bottomRight, children }) {
 }
 
 function Obj(props) {
-    const ctx = React.useContext(Ctx);
-    const cell = calcCellPos(props.pos, ctx);
+    const level = React.useContext(Level);
+    const cell = calcCellPos(props.pos, level);
     const style = cellPosToStyle(cell);
     const type = props.pos.type;
     return (
         <div className={type.className} style={style}>
-            {type.render && type.render({level: ctx, it: props.pos.type})}
+            {type.render && type.render({level: level, it: props.pos.type})}
         </div>
     );
 }
 
-const Ctx = React.createContext();
+const Level = React.createContext();
 
 function clamp(x, a, b) {
     return x < a ? a : x > b ? b : x;
@@ -493,6 +500,43 @@ export const colors = [
     "rgb(0,255,45)",
 ];
 
+function Burger() {
+    const m = 15;
+    return (
+        <svg width={30} height={30} viewBox="0 0 100 100">
+            <g stroke="#aaa" stroke-width={8}>
+                <line x1={m} y1={25} x2={100-m} y2={25}/>
+                <line x1={m} y1={50} x2={100-m} y2={50}/>
+                <line x1={m} y1={75} x2={100-m} y2={75}/>
+            </g>
+        </svg>
+    );
+}
+
+function MapControls() {
+    const level = React.useContext(Level);
+    const choose = () => {
+        level.setLevel(startLevel(levels.chooseLevel(level.setLevel)));
+    };
+    const restart = () => restartLevel(level);
+    return (
+        <div className="controls">
+            <button onClick={choose}><Burger/></button>
+            {level._name}
+            <button onClick={restart}>&#8635;</button>
+        </div>
+    );
+}
+
+const counter = {
+    current: 0,
+}
+function getNextCounter() {
+    const value = counter.current;
+    counter.current += 1;
+    return value;
+}
+
 const baseLevel = {
     _name: "base",
     d: 45,
@@ -506,12 +550,15 @@ const baseLevel = {
     },
     render: ({ level }) => {
         return (
-            <Map onSetPlayerPos={level.walk}>
-                {level.backgrounds.map((bg, i) => bg())}
-                {level.objects.map((pos, i) => <Obj key={i} pos={pos}/>)}
-                <Player/>
-                {level.popover && level.popover()}
-            </Map>
+            <>
+                <Map key={level._counter} onSetPlayerPos={level.walk}>
+                    {level.backgrounds.map((bg, i) => bg())}
+                    {level.objects.map((pos, i) => <Obj key={i} pos={pos}/>)}
+                    <Player/>
+                    {level.popover && level.popover()}
+                </Map>
+                <MapControls/>
+            </>
         );
     },
 };
@@ -523,7 +570,7 @@ function winAndSetNextByTemplate(template, setLevel) {
 }
 export const levels = {
     t1: setLevel => ({
-        ...baseLevel, _name: "t1", setLevel,
+        ...baseLevel, _name: "1", setLevel,
         pos: {x: 2, y: 3, carry: ObjType.key},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 4, y: 3}),
@@ -531,7 +578,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t2, setLevel),
     }),
     t2: setLevel => ({
-        ...baseLevel, _name: "t2", setLevel,
+        ...baseLevel, _name: "2", setLevel,
         pos: {x: 1, y: 1},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 5, y: 5}),
@@ -542,7 +589,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t3, setLevel),
     }),
     t3: setLevel => ({
-        ...baseLevel, _name: "t3", setLevel,
+        ...baseLevel, _name: "3", setLevel,
         pos: {x: 1, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 5, y: 3}),
@@ -551,7 +598,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t4, setLevel),
     }),
     t4: setLevel => ({
-        ...baseLevel, _name: "t4", setLevel,
+        ...baseLevel, _name: "4", setLevel,
         pos: {x: 2, y: 1},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 2, y: 5}),
@@ -561,7 +608,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t5, setLevel),
     }),
     t5: setLevel => ({
-        ...baseLevel, _name: "t5", setLevel,
+        ...baseLevel, _name: "5", setLevel,
         pos: {x: 3, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target,
@@ -573,7 +620,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t6, setLevel),
     }),
     t6: setLevel => ({
-        ...baseLevel, _name: "t6", setLevel,
+        ...baseLevel, _name: "6", setLevel,
         pos: {x: 1, y: 1},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 5, y: 1}),
@@ -586,7 +633,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t7, setLevel),
     }),
     t7: setLevel => ({
-        ...baseLevel, _name: "t7", setLevel,
+        ...baseLevel, _name: "7", setLevel,
         pos: {x: 1, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 5, y: 1}),
@@ -599,7 +646,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t8, setLevel),
     }),
     t8: setLevel => ({
-        ...baseLevel, _name: "t9", setLevel,
+        ...baseLevel, _name: "9", setLevel,
         pos: {x: 3, y: 1},
         onLoad: level => {
             const add = (...args) => addObjectsOfType(level, ...args);
@@ -618,7 +665,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t9, setLevel),
     }),
     t9: setLevel => ({
-        ...baseLevel, _name: "t10", setLevel,
+        ...baseLevel, _name: "10", setLevel,
         pos: {x: 1, y: 1},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 5, y: 1}),
@@ -631,7 +678,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t10, setLevel),
     }),
     t10: setLevel => ({
-        ...baseLevel, _name: "t10", setLevel,
+        ...baseLevel, _name: "10", setLevel,
         pos: {x: 2, y: 3},
         onLoad: level => {
             const add = (...args) => addObjectsOfType(level, ...args);
@@ -657,7 +704,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t11, setLevel),
     }),
     t11: setLevel => ({
-        ...baseLevel, _name: "t11", setLevel,
+        ...baseLevel, _name: "11", setLevel,
         pos: {x: 1, y: 2},
         onLoad: level => {
             const add = (...args) => addObjectsOfType(level, ...args);
@@ -683,7 +730,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t12, setLevel),
     }),
     t12: setLevel => ({
-        ...baseLevel, _name: "t12", setLevel,
+        ...baseLevel, _name: "12", setLevel,
         pos: {x: 5, y: 5},
         onLoad: level => {
             const add = (...args) => addObjectsOfType(level, ...args);
@@ -706,7 +753,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t13, setLevel),
     }),
     t13: setLevel => ({
-        ...baseLevel, _name: "t13", setLevel,
+        ...baseLevel, _name: "13", setLevel,
         pos: {x: 3, y: 2},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 6}),
@@ -739,7 +786,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t14, setLevel),
     }),
     t14: setLevel => ({
-        ...baseLevel, _name: "t14", setLevel,
+        ...baseLevel, _name: "14", setLevel,
         pos: {x: 6, y: 1},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 0}, {x: 5, y: 5}),
@@ -765,7 +812,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t15, setLevel),
     }),
     t15: setLevel => ({
-        ...baseLevel, _name: "t15", setLevel,
+        ...baseLevel, _name: "15", setLevel,
         height: 8,
         pos: {x: 3, y: 2},
         onLoad: [
@@ -792,7 +839,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t16, setLevel),
     }),
     t16: setLevel => ({
-        ...baseLevel, _name: "t16", setLevel,
+        ...baseLevel, _name: "16", setLevel,
         pos: {x: 3, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 6}),
@@ -818,7 +865,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t17, setLevel),
     }),
     t17: setLevel => ({
-        ...baseLevel, _name: "t17", setLevel,
+        ...baseLevel, _name: "17", setLevel,
         pos: {x: 3, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target,
@@ -842,7 +889,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t18, setLevel),
     }),
     t18: setLevel => ({
-        ...baseLevel, _name: "t18", setLevel,
+        ...baseLevel, _name: "18", setLevel,
         pos: {x: 3, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 0}),
@@ -867,7 +914,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t19, setLevel),
     }),
     t19: setLevel => ({
-        ...baseLevel, _name: "t19", setLevel,
+        ...baseLevel, _name: "19", setLevel,
         pos: {x: 3, y: 2},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 3, y: 6}),
@@ -892,7 +939,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t20, setLevel),
     }),
     t20: setLevel => ({
-        ...baseLevel, _name: "t20", setLevel,
+        ...baseLevel, _name: "20", setLevel,
         pos: {x: 5, y: 3},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 1, y: 3}),
@@ -917,7 +964,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t21, setLevel),
     }),
     t21: setLevel => ({
-        ...baseLevel, _name: "t21", setLevel,
+        ...baseLevel, _name: "21", setLevel,
         pos: {x: 0, y: 6},
         onLoad: [
             $addObjectsOfType(ObjType.target, {x: 6, y: 6}, {x: 0, y: 0}),
@@ -935,7 +982,7 @@ export const levels = {
         nextLevel: winAndSetNextByTemplate(levels.t22, setLevel),
     }),
     t22: setLevel => ({
-        ...baseLevel, _name: "t22", setLevel,
+        ...baseLevel, _name: "22", setLevel,
         height: 8,
         pos: {x: 3, y: 3},
         onLoad: [
@@ -1041,6 +1088,7 @@ function startLevel(level) {
     const result = Object.assign(level);
     level.objects.length = 0;
     level.backgrounds.length = 0;
+    level._counter = getNextCounter();
     if (Array.isArray(level.onLoad)) {
         level.onLoad.map(f => f(result));
     } else if (typeof level.onLoad === "function") {
@@ -1054,6 +1102,17 @@ function startLevel(level) {
     }
     console.log("startLevel", result);
     return result;
+}
+
+function restartLevel(level) {
+    const keyName = "t" + level._name;
+    for (const name in levels) {
+        if (name === keyName) {
+            level.setLevel(startLevel(levels[name](level.setLevel)));
+            return;
+        }
+    }
+    throw new RangeError(`Level not found: ${keyName}`);
 }
 
 export function Walkie(props) {
@@ -1072,9 +1131,9 @@ export function Walkie(props) {
     const RenderLevel = level.render;
     return (
         <div className="walkie">
-            <Ctx.Provider value={level}>
+            <Level.Provider value={level}>
                 <RenderLevel level={level}/>
-            </Ctx.Provider>
+            </Level.Provider>
         </div>
     );
 }

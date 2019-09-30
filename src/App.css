@@ -8,6 +8,7 @@ body {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background: #000;
+    font-family: arial, "sans serif";
 }
 footer {
     position: fixed;
@@ -37,6 +38,39 @@ footer.hidden {
 }
 .map {
     border: 8px solid #232323;
+}
+
+.walkie .controls {
+    margin-top: 15px;
+    font-size: 20px;
+    background: #232323;
+    border-radius: 35px;
+    padding: .5em;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.walkie .controls button {
+    background: #27344f;
+    border-radius: 50%;
+    border: 0;
+    font: inherit;
+    color: inherit;
+    width: 50px;
+    height: 50px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.walkie .controls button:focus {
+    outline: none;
+}
+.walkie .controls button:active {
+    transition: all 0.1s;
+    transform: scale(0.8);
+    background-color: #37567c;
 }
 
 .win-level {
@@ -94,7 +128,7 @@ footer.hidden {
     margin: 6px;
     border: none;
     border-radius: 50%;
-    font-size: 25px;
+    font-size: 20px;
     color: #fff;
 }
 .choose-level button:focus {
