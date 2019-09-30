@@ -1129,12 +1129,12 @@ function getLevelNameFromRouter(location) {
 }
 
 function WalkieComponent(props) {
-    const [level, _setLevel] = React.useState(null);
-    const setLevel = (...args) => {
-        _setLevel(...args);
-
-    };
+    const [level, setLevel] = React.useState(null);
     const onStart = () => {
+        if (props.startLevel) {
+            setLevel(startLevel(props.startLevel(setLevel)));
+            return;
+        }
         const name = getLevelNameFromRouter(props.location) || "1";
         setLevel(startLevel(levels[name](setLevel)));
     }; // Prevent exhaustive-deps eslint rule from firing
