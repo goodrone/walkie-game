@@ -1069,6 +1069,45 @@ export const levels = {
                 add(figure(cc[1]), {x: 1, y: 6});
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels["25"], setLevel),
+    }),
+    "25": setLevel => ({
+        ...baseLevel, name: "25", setLevel,
+        pos: {x: 3, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target,
+                {x: 0, y: 0}, {x: 0, y: 3}, {x: 0, y: 6},
+            ),
+            level => {
+                addDuckPond(level, {x:0, y:1}, {x:1, y:2});
+                addDuckPond(level, {x:0, y:4}, {x:1, y:5});
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+                const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+                {
+                    const cc = shuffle(colors);
+                    [   {x: 6, y: 0}, {x: 5, y: 0}, {x: 5, y: 1},
+                        {x: 5, y: 2}, {x: 5, y: 3}, {x: 5, y: 4},
+                        {x: 5, y: 5}, {x: 5, y: 6}, {x: 6, y: 6},
+                    ].forEach((pos, i) => {
+                        add(figure(cc[i]), pos);
+                    });
+                }
+                {
+                    const cc = chooseN(colors, 5);
+                    const [c1, c2, c3] = chooseN(cc, 3);
+                    add(npc(c1), {x: 1, y: 0});
+                    add(npc(c2), {x: 1, y: 3});
+                    add(npc(c3), {x: 1, y: 6});
+                    [   {x: 6, y: 1}, {x: 6, y: 2}, {x: 6, y: 3},
+                        {x: 6, y: 4}, {x: 6, y: 5},
+                    ].forEach((pos, i) => {
+                        add(figure(cc[i]), pos);
+                    });
+                }
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
