@@ -1166,6 +1166,31 @@ export const levels = {
                 });
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels["28"], setLevel),
+    }),
+    "28": setLevel => ({
+        ...baseLevel, name: "28", setLevel,
+        pos: {x: 1, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 6, y: 3}, {x: 6, y: 6}),
+            $addObjectsOfType(ObjType.key, {x: 6, y: 0}),
+            $addObjectsOfType(ObjType.lock, {x: 3, y: 3}),
+            level => {
+                addDuckPond(level, {x:3, y:1}, {x:6, y:2});
+                addDuckPond(level, {x:3, y:4}, {x:6, y:5});
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+                const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+                const cc = chooseN(colors, 3);
+                add(figure(cc[0]), {x: 3, y: 6});
+                add(npc(cc[0]), {x: 3, y: 0});
+                add(figure(cc[1]), {x: 4, y: 0});
+                add(npc(cc[1]), {x: 4, y: 6});
+                add(figure(cc[2]), {x: 5, y: 6});
+                add(npc(cc[2]), {x: 5, y: 0});
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
@@ -1198,7 +1223,6 @@ export const levels = {
     chooseLevel: setLevel => ({
         ...baseLevel, setLevel,
         render: ({ level }) => {
-            console.log("choose", level);
             const onChoose = level => setLevel(startLevel(levels[level](setLevel)));
             return (
                 <div className="choose-level" style={computeLevelStyle(level)}>
@@ -1222,7 +1246,6 @@ function computeLevelStyle(level) {
 const ChooseLevels = withRouter(({ onChoose, levels, location }) => {
     const current = getLevelNameFromRouter(location);
     const ref = React.useRef(null);
-    console.log("choose", current);
     React.useLayoutEffect(() => {
         if (ref.current !== null) {
             ref.current.scrollIntoView({block: "center"});
