@@ -1142,6 +1142,30 @@ export const levels = {
                 add(npc(c2), {x: 1, y: 5});
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels["27"], setLevel),
+    }),
+    "27": setLevel => ({
+        ...baseLevel, name: "27", setLevel,
+        pos: {x: 3, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 3, y: 0}, {x: 3, y: 6}),
+            level => {
+                addDuckPond(level, {x:0, y:0}, {x:0, y:6});
+                addDuckPond(level, {x:6, y:0}, {x:6, y:6});
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+                const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+                [{npcY: 1, figureX: 1}, {npcY: 5, figureX: 5}].forEach(p => {
+                    const cc = chooseN(colors, 5);
+                    [1, 2, 3, 4, 5].forEach((x, i) => {
+                        add(npc(cc[i]), {x, y: p.npcY});
+                    });
+                    const c = pickRandom(cc);
+                    add(figure(c), {x: p.figureX, y: 3});
+                });
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
@@ -1174,17 +1198,11 @@ export const levels = {
     chooseLevel: setLevel => ({
         ...baseLevel, setLevel,
         render: ({ level }) => {
+            console.log("choose", level);
             const onChoose = level => setLevel(startLevel(levels[level](setLevel)));
             return (
                 <div className="choose-level" style={computeLevelStyle(level)}>
-                    <ChooseLevels onChoose={onChoose} levels={Object.keys(levels)} levels_XXX={
-                        [
-                            levels.t1, levels.t2, levels.t3, levels.t4, levels.t5,
-                            levels.t6, levels.t7, levels.t8, levels.t9, levels.t10,
-                            levels.t11, levels.t12, levels.t13, levels.t14,
-                            levels.t15, levels.t16, levels.t17, levels.t18,
-                            levels.t19, levels.t20, levels.t21, levels.t22,
-                        ]}/>
+                    <ChooseLevels onChoose={onChoose} levels={Object.keys(levels)}/>
                 </div>
             );
         },
@@ -1201,22 +1219,35 @@ function computeLevelStyle(level) {
     return style;
 }
 
-function ChooseLevels({ onChoose, levels }) {
+const ChooseLevels = withRouter(({ onChoose, levels, location }) => {
+    const current = getLevelNameFromRouter(location);
+    const ref = React.useRef(null);
+    console.log("choose", current);
+    React.useLayoutEffect(() => {
+        if (ref.current !== null) {
+            ref.current.scrollIntoView({block: "center"});
+        }
+    }, []);
     return (
         <div className="level-list">
             {levels.map((level, i) => {
                 if (isNaN(level)) {
                     return null;
                 }
+                const props = {};
+                if (current === level) {
+                    props.className = "current";
+                    props.ref = ref;
+                }
                 return (
-                    <button key={level} onClick={() => onChoose(level)}>
+                    <button key={level} onClick={() => onChoose(level)} {...props}>
                         {level}
                     </button>
                 );
             })}
         </div>
     );
-}
+});
 
 function startLevel(level) {
     const result = Object.assign(level);
