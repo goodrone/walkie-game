@@ -1024,11 +1024,11 @@ export const levels = {
             ),
             level => {
                 addDuckPond(level, {x:1, y:6}, {x:5, y:6});
-                const cc = chooseN(colors, 8);
                 const add = (...args) => addObjectsOfType(level, ...args);
                 const render = c => ({ d }) => <Square color={c} d={d}/>;
                 const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
                 const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+                const cc = chooseN(colors, 8);
                 const c1 = pickRandom([cc[0], cc[1]]);
                 add(npc(c1), {x: 1, y: 2});
                 add(figure(cc[0]), {x: 0, y: 6});
@@ -1043,6 +1043,30 @@ export const levels = {
                 add(figure(cc[5]), {x: 4, y: 1});
                 add(figure(cc[6]), {x: 5, y: 0});
                 add(figure(cc[7]), {x: 6, y: 1});
+            },
+        ],
+        nextLevel: winAndSetNextByTemplate(levels["24"], setLevel),
+    }),
+    "24": setLevel => ({
+        ...baseLevel, name: "24", setLevel,
+        pos: {x: 1, y: 2},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 6, y: 2}),
+            $addObjectsOfType(ObjType.key, {x: 6, y: 0}),
+            $addObjectsOfType(ObjType.lock, {x: 3, y: 6}),
+            $addObjectsOfType(ObjType.wall, {x: 0, y: 4}, {x: 6, y: 1}),
+            level => {
+                addDuckPond(level, {x:1, y:4}, {x:2, y:5});
+                addDuckPond(level, {x:4, y:4}, {x:5, y:5});
+                addDuckPond(level, {x:4, y:1}, {x:5, y:2});
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+                const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+                const cc = chooseN(colors, 2);
+                add(npc(cc[0]), {x: 6, y: 3});
+                add(figure(cc[0]), {x: 0, y: 5});
+                add(figure(cc[1]), {x: 1, y: 6});
             },
         ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
