@@ -1253,10 +1253,10 @@ export const levels = {
             level => {
                 const add = (...args) => addObjectsOfType(level, ...args);
                 const numpad = n => ({...ObjType.numpadLock, n});
-                const npc = n => ({...ObjType.npc, who: ObjType.npc.advisor,
+                const advisor = n => ({...ObjType.npc, who: ObjType.npc.advisor,
                     shape: () => <Hint s={n}/>});
                 const n = pickRandom([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-                add(npc(n), {x: 5, y: 5});
+                add(advisor(n), {x: 5, y: 5});
                 add(numpad(n), {x: 3, y: 2});
             },
         ],
@@ -1272,12 +1272,45 @@ export const levels = {
                 addDuckPond(level, {x: 3, y: 3}, {x: 3, y: 6});
                 const add = (...args) => addObjectsOfType(level, ...args);
                 const numpad = n => ({...ObjType.numpadLock, n});
-                const npc = n => ({...ObjType.npc, who: ObjType.npc.advisor,
+                const advisor = n => ({...ObjType.npc, who: ObjType.npc.advisor,
                     shape: () => <Hint s={n}/>});
                 const nn = chooseN([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 2);
-                [{npcX: 0, numpadX: 2}, {npcX: 6, numpadX: 4}].forEach((p, i) => {
-                    add(npc(nn[i]), {x: p.npcX, y: 3});
+                [{advisorX: 0, numpadX: 2}, {advisorX: 6, numpadX: 4}].forEach((p, i) => {
+                    add(advisor(nn[i]), {x: p.advisorX, y: 3});
                     add(numpad(nn[i]), {x: p.numpadX, y: 3});
+                });
+            },
+        ],
+        nextLevel: winAndSetNextByTemplate(levels["31"], setLevel),
+    }),
+    "31": setLevel => ({
+        ...baseLevel, name: "31", setLevel,
+        pos: {x: 3, y: 4},
+        onLoad: [
+            $addObjectsOfType(ObjType.target,
+                {x: 0, y: 0}, {x: 3, y: 0}, {x: 6, y: 0},
+            ),
+            level => {
+                addDuckPond(level, {x: 1, y: 0}, {x: 2, y: 2});
+                addDuckPond(level, {x: 4, y: 0}, {x: 5, y: 2});
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const numpad = n => ({...ObjType.numpadLock, n});
+                const advisor = n => ({...ObjType.npc, who: ObjType.npc.advisor,
+                    shape: () => <Hint s={n}/>});
+                const n = pickRandom([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                add(advisor(n), {x: 3, y: 6});
+                add(numpad(n), {x: 3, y: 2});
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+                const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+                const cc = chooseN(colors, 8);
+                const [c1, c2] = chooseN(cc, 2);
+                add(npc(c1), {x: 0, y: 2});
+                add(npc(c2), {x: 6, y: 2});
+                [   {x: 0, y: 5}, {x: 0, y: 6}, {x: 1, y: 5},
+                    {x: 1, y: 6}, {x: 5, y: 5}, {x: 5, y: 6},
+                    {x: 6, y: 5}, {x: 6, y: 6} ].forEach((pos, i) => {
+                    add(figure(cc[i]), pos);
                 });
             },
         ],
