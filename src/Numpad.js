@@ -48,7 +48,7 @@ export function Numpad({ onValidate, onCancel, active }) {
                 <button onClick={reset} className="cancel">&times;</button>
                 <div ref={ref} className="value">{value}</div>
                 <button onClick={() => validate(value)} className="accept"
-                    disabled={value === ""}>&#9658;</button>
+                    disabled={value === ""}>&#x2713;</button>
             </div>
             <Numbers onAdd={s => setValue(v => v + s)} active={active}/>
         </div>
