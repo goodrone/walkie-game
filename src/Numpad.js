@@ -22,7 +22,7 @@ function Numbers({ onAdd, active }) {
     );
 }
 
-export function Numpad({ onValidate, onCancel, active }) {
+export function Numpad({ onValidate, onCancel, active, max = 2 }) {
     const [value, setValue] = React.useState("");
     const ref = React.useRef();
     const reset = () => {
@@ -35,11 +35,22 @@ export function Numpad({ onValidate, onCancel, active }) {
             setValue("");
         }
     };
+    const animateShake = () => {
+        ref.current.classList.remove("animate-shake");
+        void ref.current.offsetWidth;
+        ref.current.classList.add("animate-shake");
+    };
     const validate = n => {
         if (active && onValidate(n) !== true) {
-            ref.current.classList.remove("animate-shake");
-            void ref.current.offsetWidth;
-            ref.current.classList.add("animate-shake");
+            animateShake();
+        }
+    };
+    const add = v => {
+        const next = value + v;
+        if (next.length > max) {
+            animateShake();
+        } else {
+            setValue(next);
         }
     };
     return (
@@ -50,7 +61,7 @@ export function Numpad({ onValidate, onCancel, active }) {
                 <button onClick={() => validate(value)} className="accept"
                     disabled={value === ""}>&#x2713;</button>
             </div>
-            <Numbers onAdd={s => setValue(v => v + s)} active={active}/>
+            <Numbers onAdd={s => add(s)} active={active}/>
         </div>
     );
 }

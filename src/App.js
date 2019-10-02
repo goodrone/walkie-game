@@ -1255,7 +1255,7 @@ export const levels = {
                 const numpad = n => ({...ObjType.numpadLock, n});
                 const npc = n => ({...ObjType.npc, who: ObjType.npc.advisor,
                     shape: () => <Hint s={n}/>});
-                const n = Math.floor(10 + Math.random() * 90);
+                const n = pickRandom([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
                 add(npc(n), {x: 5, y: 5});
                 add(numpad(n), {x: 3, y: 2});
             },
