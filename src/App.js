@@ -1260,6 +1260,27 @@ export const levels = {
                 add(numpad(n), {x: 3, y: 2});
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels["30"], setLevel),
+    }),
+    "30": setLevel => ({
+        ...baseLevel, name: "30", setLevel,
+        pos: {x: 3, y: 1},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 1, y: 6}, {x: 5, y: 6}),
+            $addObjectsOfType(ObjType.wall, {x: 1, y: 3}, {x: 5, y: 3}),
+            level => {
+                addDuckPond(level, {x: 3, y: 3}, {x: 3, y: 6});
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const numpad = n => ({...ObjType.numpadLock, n});
+                const npc = n => ({...ObjType.npc, who: ObjType.npc.advisor,
+                    shape: () => <Hint s={n}/>});
+                const nn = chooseN([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 2);
+                [{npcX: 0, numpadX: 2}, {npcX: 6, numpadX: 4}].forEach((p, i) => {
+                    add(npc(nn[i]), {x: p.npcX, y: 3});
+                    add(numpad(nn[i]), {x: p.numpadX, y: 3});
+                });
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
