@@ -1,0 +1,8 @@
+.bool-choice {
+    display: flex;
+    flex-direction: row;
+    margin: 1em 0;
+}
+.bool-choice input {
+    margin-left: 1em;
+}

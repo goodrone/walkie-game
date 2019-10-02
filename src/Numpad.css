@@ -1,0 +1,75 @@
+.numpad {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    font-size: 30px;
+    font-family: arial, "sans serif";
+}
+
+.numpad button {
+    border: 0;
+    background: #393;
+    width: 55px;
+    height: 55px;
+    font: inherit;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.numpad button:focus { outline: 0 }
+
+.numpad .display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.numpad .display .value {
+    width: 150px;
+    text-align: center;
+    font-size: 120%;
+    font-weight: bold;
+    letter-spacing: 4px;
+}
+.numpad .display .value.animate-shake {
+    animation: shake 0.1s 2, red 0.4s;
+}
+@keyframes red {
+    0% { color: inherit; }
+    50% { color: red; }
+    100% { color: inherit; }
+}
+
+.numpad .display button.cancel {
+    background: none;
+    border-radius: 50%;
+    xborder: 1px solid #aa4040;
+    color: #919191;
+}
+
+.numpad .display button.accept {
+    background: #225319;
+    border-radius: 50%;
+    border: 4px solid #397434;
+    color: #ffffff;
+}
+.numpad .display button:disabled.accept {
+    background: #4d4d4d;
+    border: 1px solid #282828;
+    color: #919191;
+}
+
+.numpad .numbers {
+    margin: 0 auto;
+}
+.numpad .numbers div {
+    display: flex;
+    justify-content: center;
+}
+.numpad .numbers button {
+    margin: 1px;
+    background: #747466;
+    border-radius: 10px;
+}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { HashRouter, withRouter } from "react-router-dom";
+import { Numpad } from './Numpad.js';
 import './App.css';
 
 function Map(props) {
@@ -338,6 +339,37 @@ const ObjType = {
         },
         interact: carryItem,
     },
+    numpadLock: {
+        className: "numpad-lock",
+        render: () => <>&#x1f4f1;</>,
+        interact: (level, next, index) => {
+            const o = level.objects[index];
+            level.popover = function NumpadLockPopover() {
+                const dismiss = () => {
+                    level.setLevel(prev => ({...prev, popover: null}));
+                };
+                const onValidate = n => {
+                    if (n.toString() === o.type.n.toString()) {
+                        level.objects.splice(index, 1);
+                        level.pos.animateEat();
+                        const state = {...level, ...next};
+                        state.popover = null;
+                        level.setLevel(state);
+                        return true;
+                    } else {
+                        console.log(`Expected: ${o.type.n}, entered: ${n}`);
+                        return false;
+                    }
+                };
+                return (
+                    <div className="popover" onTouchStart={e => e.stopPropagation()}>
+                        <Numpad onValidate={onValidate} onCancel={dismiss}/>
+                    </div>
+                );
+            };
+            return {};
+        },
+    },
     door: {
         className: "door",
         render: () => <>&#x1f6aa;</>,
@@ -354,7 +386,9 @@ const ObjType = {
     },
     npc: {
         className: "npc",
-        render: () => <>&#x1f468;&#x1f3fb;</>,
+        who: () => <>&#x1f468;&#x1f3fb;</>,
+        advisor: () => <>&#x1f469;&#x1f3fb;</>,
+        render: ({ it }) => <>{it.who()}</>,
         interact: (level, next, index) => {
             const o = level.objects[index];
             if (level.pos.carry && level.pos.carry.what === o.type.wants) {
@@ -376,7 +410,7 @@ const ObjType = {
                     }, inputCooldownMs);
                     return () => clearTimeout(t);
                 }, []);
-                const dismiss = e => {
+                const dismiss = () => {
                     ready && level.setLevel(prev => ({...prev, popover: null}));
                 };
                 const Shape = o.type.shape;
@@ -384,8 +418,7 @@ const ObjType = {
                     <div className="popover" onTouchStart={e => e.stopPropagation()}>
                         <div className="speech">
                             <div className="who">
-                                {/* eslint-disable-next-line */}
-                                &#x1f468;&#x1f3fb;
+                                {o.type.who()}
                             </div>
                             <div className="what">
                                 <Shape d={45}/>
@@ -1189,6 +1222,26 @@ export const levels = {
                 add(npc(cc[1]), {x: 4, y: 6});
                 add(figure(cc[2]), {x: 5, y: 6});
                 add(npc(cc[2]), {x: 5, y: 0});
+            },
+        ],
+        nextLevel: winAndSetNextByTemplate(levels["29"], setLevel),
+    }),
+    "29": setLevel => ({
+        ...baseLevel, name: "29", setLevel,
+        pos: {x: 1, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 5, y: 1}),
+            $addObjectsOfType(ObjType.wall,
+                {x: 3, y: 0}, {x: 3, y: 1}, {x: 3, y: 3}, {x: 4, y: 3},
+                {x: 5, y: 3}, {x: 6, y: 3}),
+            level => {
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const numpad = n => ({...ObjType.numpadLock, n});
+                const npc = n => ({...ObjType.npc, who: ObjType.npc.advisor,
+                    shape: () => `${n}`});
+                const n = Math.floor(10 + Math.random() * 90);
+                add(npc(n), {x: 5, y: 5});
+                add(numpad(n), {x: 3, y: 2});
             },
         ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),

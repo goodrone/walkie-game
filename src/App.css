@@ -225,7 +225,7 @@ footer.hidden {
     position: absolute;
     font-size: 22px;
 }
-.player, .target, .wall, .lock, .figure, .door, .npc {
+.player, .target, .wall, .lock, .figure, .numpad-lock, .door, .npc {
     display: flex;
     x-flex-direction: column;
     justify-content: center;
