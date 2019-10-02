@@ -1,8 +1,8 @@
 import React from 'react';
 import './Numpad.css';
 
-function Numbers({ onAdd }) {
-    const add = v => () => onAdd(v);
+function Numbers({ onAdd, active }) {
+    const add = v => () => active && onAdd(v);
     const num = n => <button onClick={add(n)}>{n}</button>;
     return (
         <div className="numbers">
@@ -22,10 +22,13 @@ function Numbers({ onAdd }) {
     );
 }
 
-export function Numpad({ onValidate, onCancel }) {
+export function Numpad({ onValidate, onCancel, active }) {
     const [value, setValue] = React.useState("");
     const ref = React.useRef();
     const reset = () => {
+        if (!active) {
+            return;
+        }
         if (value === "") {
             onCancel();
         } else {
@@ -33,7 +36,7 @@ export function Numpad({ onValidate, onCancel }) {
         }
     };
     const validate = n => {
-        if (onValidate(n) !== true) {
+        if (active && onValidate(n) !== true) {
             ref.current.classList.remove("animate-shake");
             void ref.current.offsetWidth;
             ref.current.classList.add("animate-shake");
@@ -47,7 +50,7 @@ export function Numpad({ onValidate, onCancel }) {
                 <button onClick={() => validate(value)} className="accept"
                     disabled={value === ""}>&#9658;</button>
             </div>
-            <Numbers onAdd={s => setValue(v => v + s)}/>
+            <Numbers onAdd={s => setValue(v => v + s)} active={active}/>
         </div>
     );
 }

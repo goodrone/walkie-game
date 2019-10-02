@@ -242,6 +242,17 @@ function numberOfObjTypes(array, type) {
 
 const inputCooldownMs = 600;
 
+function withCooldown(BaseComponent) {
+    return function WithCooldown(props) {
+        const [active, setActive] = React.useState(false);
+        React.useEffect(() => {
+            const t = setTimeout(() => setActive(true), inputCooldownMs);
+            return () => clearTimeout(t);
+        }, []);
+        return <BaseComponent active={active} {...props}/>;
+    };
+}
+
 function Square({ d, color, shadow, className }) {
     const style = {
         boxShadow: shadow && "0 0 10px 1px #d4d4d4",
@@ -344,6 +355,7 @@ const ObjType = {
         render: () => <>&#x1f4f1;</>,
         interact: (level, next, index) => {
             const o = level.objects[index];
+            const DelayedNumpad = withCooldown(Numpad);
             level.popover = function NumpadLockPopover() {
                 const dismiss = () => {
                     level.setLevel(prev => ({...prev, popover: null}));
@@ -363,7 +375,7 @@ const ObjType = {
                 };
                 return (
                     <div className="popover" onTouchStart={e => e.stopPropagation()}>
-                        <Numpad onValidate={onValidate} onCancel={dismiss}/>
+                        <DelayedNumpad onValidate={onValidate} onCancel={dismiss}/>
                     </div>
                 );
             };
@@ -560,6 +572,10 @@ function MapControls() {
             <button onClick={restart}>&#8635;</button>
         </div>
     );
+}
+
+function Hint({ s }) {
+    return <div className="hint">{`${s}`}</div>;
 }
 
 const counter = {
@@ -1238,7 +1254,7 @@ export const levels = {
                 const add = (...args) => addObjectsOfType(level, ...args);
                 const numpad = n => ({...ObjType.numpadLock, n});
                 const npc = n => ({...ObjType.npc, who: ObjType.npc.advisor,
-                    shape: () => `${n}`});
+                    shape: () => <Hint s={n}/>});
                 const n = Math.floor(10 + Math.random() * 90);
                 add(npc(n), {x: 5, y: 5});
                 add(numpad(n), {x: 3, y: 2});

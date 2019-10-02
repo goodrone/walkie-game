@@ -1,5 +1,6 @@
 body {
     color: #eee;
+    font-family: arial, sans-serif;
 }
 .app {
     display: flex;
@@ -8,7 +9,6 @@ body {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background: #000;
-    font-family: arial, "sans serif";
 }
 footer {
     position: fixed;
@@ -295,4 +295,10 @@ footer.hidden {
     border: 3px solid #333;
     background: #000;
     box-sizing: border-box;
+}
+
+.hint {
+    text-shadow: 2px 2px 3px black;
+    letter-spacing: 8px;
+    font-weight: bold;
 }
