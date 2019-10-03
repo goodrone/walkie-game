@@ -1347,6 +1347,34 @@ export const levels = {
                 add(numpad(n3), {x: 4, y: 5});
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels["33"], setLevel),
+    }),
+    "33": setLevel => ({
+        ...baseLevel, name: "33", setLevel,
+        pos: {x: 2, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target, {x: 6, y: 6}),
+            $addObjectsOfType(ObjType.key, {x: 0, y: 2}),
+            $addObjectsOfType(ObjType.lock, {x: 4, y: 1}),
+            level => {
+                addDuckPond(level, {x:0, y:0}, {x:3, y:1});
+                addDuckPond(level, {x:0, y:4}, {x:3, y:6});
+                addDuckPond(level, {x:5, y:0}, {x:6, y:4});
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const figure = c => ({...ObjType.figure, what: c, shape: render(c)});
+                const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+                const c = pickRandom(colors);
+                add(figure(c), {x: 4, y: 0});
+                add(npc(c), {x: 4, y: 4});
+                const numpad = n => ({...ObjType.numpadLock, n});
+                const advisor = n => ({...ObjType.npc, who: ObjType.npc.advisor,
+                    shape: () => <Hint s={n}/>});
+                const n = pickRandom([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                add(numpad(n), {x: 4, y: 5});
+                add(advisor(n), {x: 0, y: 3});
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
