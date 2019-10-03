@@ -93,6 +93,10 @@ footer.hidden {
     border-radius: 50%;
     font-size: 40px;
     color: #fff;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .win-level button.list {
     position: absolute;

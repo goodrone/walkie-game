@@ -1,5 +1,6 @@
 import React from 'react';
 import './Numpad.css';
+import { Triangle } from './App.js';
 
 function Numbers({ onAdd, active }) {
     const add = v => () => active && onAdd(v);
@@ -59,7 +60,7 @@ export function Numpad({ onValidate, onCancel, active, max = 2 }) {
                 <button onClick={reset} className="cancel">&times;</button>
                 <div ref={ref} className="value">{value}</div>
                 <button onClick={() => validate(value)} className="accept"
-                    disabled={value === ""}>&#x2713;</button>
+                    disabled={value === ""}><Triangle color={"currentColor"} d={24}/></button>
             </div>
             <Numbers onAdd={s => add(s)} active={active}/>
         </div>

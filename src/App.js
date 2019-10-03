@@ -265,15 +265,23 @@ function Square({ d, color, shadow, className }) {
     );
 }
 
-function Triangle({ color, className, angle, d }) {
+export function Triangle({ color, className="", angle=0, d }) {
     const style = {
         margin: "auto",
     };
+    const r = 100;
+    const points = [];
+    for (let i = 0; i < 3; i++) {
+        const a = 2 * Math.PI * i / 3 + angle / 180 * Math.PI;
+        const x = r * Math.cos(a);
+        const y = r * Math.sin(a);
+        points.push(Math.round(x), Math.round(y));
+    }
+    const viewbox = [-r, -r, 2 * r, 2 * r].join(" ");
     return (
-        <svg width={d} height={d} viewBox="0 0 100 100" style={style} className={className}>
-            <g fill={color} transform={`rotate(${angle || 0} 50 50)`}>
-                <polygon points="50,15 100,100 0,100"/>
-            </g>
+        <svg width={d} height={d} viewBox={viewbox} style={style}
+            className={className}>
+            <polygon points={points.join(" ")} fill={color}/>
         </svg>
     );
 }
@@ -1361,7 +1369,7 @@ export const levels = {
             return (
                 <div className="win-level" style={computeLevelStyle(level)}>
                     {state.next && <button onClick={next} ref={ref}
-                        className="next">&#x25b6;&#xFE0E;</button>}
+                        className="next"><Triangle angle={0} color={"white"} d={30}/></button>}
                     {state.list && <button onClick={listLevels}
                         className="list"></button>}
                 </div>

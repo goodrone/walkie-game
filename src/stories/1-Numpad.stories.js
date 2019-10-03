@@ -39,7 +39,7 @@ export const numpad = function NumpadStory() {
             <BoolChoice question="Accept the input?" trueValue="Yes"
                 falseValue="No" value={accept} setValue={setAccept}/>
             <div style={style}>
-                <Numpad/>
+                <Numpad active={true} onValidate={() => accept}/>
             </div>
         </>
     );
