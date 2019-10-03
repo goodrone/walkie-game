@@ -1375,6 +1375,35 @@ export const levels = {
                 add(advisor(n), {x: 0, y: 3});
             },
         ],
+        nextLevel: winAndSetNextByTemplate(levels["34"], setLevel),
+    }),
+    "34": setLevel => ({
+        ...baseLevel, name: "34", setLevel,
+        pos: {x: 0, y: 3},
+        onLoad: [
+            $addObjectsOfType(ObjType.target,
+                {x: 4, y: 0}, {x: 6, y: 3}, {x: 4, y: 6},
+            ),
+            level => {
+                addDuckPond(level, {x: 0, y: 0}, {x: 3, y: 2});
+                addDuckPond(level, {x: 1, y: 4}, {x: 3, y: 6});
+                addDuckPond(level, {x: 5, y: 1}, {x: 6, y: 2});
+                addDuckPond(level, {x: 5, y: 4}, {x: 6, y: 5});
+                addDoor(level, {x: 6, y: 0}, {x: 6, y: 6}, {x: 5, y: 6});
+                addDoor(level, {x: 6, y: 6}, {x: 6, y: 0}, {x: 5, y: 0});
+                const add = (...args) => addObjectsOfType(level, ...args);
+                const render = c => ({ d }) => <Square color={c} d={d}/>;
+                const npc = c => ({...ObjType.npc, wants: c, shape: render(c)});
+                const c = pickRandom(colors);
+                add(npc(c), {x: 4, y: 4});
+                const numpad = n => ({...ObjType.numpadLock, n});
+                const advisor = n => ({...ObjType.npc, who: ObjType.npc.advisor,
+                    shape: () => <Hint s={n}/>});
+                const n = chooseN([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 2).join("");
+                add(numpad(n), {x: 2, y: 3});
+                add(advisor(n), {x: 0, y: 6});
+            },
+        ],
         nextLevel: winAndSetNextByTemplate(levels.chooseLevel, setLevel),
     }),
     win: next => setLevel => ({
